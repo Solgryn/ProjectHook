@@ -53,7 +53,7 @@ namespace ProjectHook
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             var fishTx = Content.Load<Texture2D>("fish");
-            player = new Player(this, new Vector2(100, 100), fishTx);
+            player = new Player(this, new Vector2(100, 100), fishTx, PlayerIndex.One);
             var cloudTx = Content.Load<Texture2D>("cloud");
             cloud = new Cloud(this, new Vector2(0,150), cloudTx);
             GameObjects.Add(cloud);

@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -136,6 +138,9 @@ namespace GrappleRace.GameFrameWork
             }
         }
 
+        //Sprite effects (CUSTOM)
+        public SpriteEffects spriteEffects { get; set; }
+
         /// <summary>
         /// Calculate a simple bounding box for the sprite
         /// </summary>
@@ -185,16 +190,19 @@ namespace GrappleRace.GameFrameWork
             // Do we have a texture? If not then there is nothing to draw...
             if (SpriteTexture != null)
             {
+                //Round off position to reduce blurryness (CUSTOM)
+                var roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y));
+
                 // Has a source rectangle been set?
                 if (SourceRect.IsEmpty)
                 {
                     // No, so draw the entire sprite texture
-                    spriteBatch.Draw(SpriteTexture, Position, null, SpriteColor, Angle, Origin, Scale, spriteEffects, LayerDepth);
+                    spriteBatch.Draw(SpriteTexture, roundedPosition, null, SpriteColor, Angle, Origin, Scale, spriteEffects, LayerDepth);
                 }
                 else
                 {
                     // Yes, so just draw the specified SourceRect
-                    spriteBatch.Draw(SpriteTexture, Position, SourceRect, SpriteColor, Angle, Origin, Scale, spriteEffects, LayerDepth);
+                    spriteBatch.Draw(SpriteTexture, roundedPosition, SourceRect, SpriteColor, Angle, Origin, Scale, spriteEffects, LayerDepth);
                 }
             }
         }
@@ -203,8 +211,5 @@ namespace GrappleRace.GameFrameWork
         {
             return BoundingBox.Intersects(other.BoundingBox);
         }
-
-
-        public SpriteEffects spriteEffects { get; set; }
     }
 }
