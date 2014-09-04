@@ -21,9 +21,18 @@ namespace ProjectHook
         public bool OnGround = false;
         private double _milisecondsSinceLastFrameUpdate = 0;
         private double AnimationCounter = 0;
-        private double AnimationSpeed = 10;
+        private double AnimationSpeed = 15;
         private int currentFrame = 0;
-        
+
+        //Animations
+        public int[] CurrentAnimation = Animation.Idle;
+
+        internal class Animation
+        {
+            public static readonly int[] Idle = {0};
+            public static readonly int[] Running = {0, 1, 0, 2};
+        }
+
         public Player(GameHost game, Vector2 position, Texture2D texture)
             : base(game, position, texture)
         {
@@ -34,29 +43,27 @@ namespace ProjectHook
         public override void Update(GameTime gameTime)
         {
             var thumbsticks = GamePad.GetState(PlayerIndex.One).ThumbSticks;
+
             //Controls
             
-            //PositionX = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X * 3-;
-            
             //Left
-            if (Keyboard.GetState().IsKeyDown(Keys.Left) || GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X < 0)
+            if (Keyboard.GetState().IsKeyDown(Keys.Left) || thumbsticks.Left.X < 0)
             {
                 spriteEffects = SpriteEffects.FlipHorizontally;
-                //Velocity.X = Math.Max(Velocity.X - Acceleration, MaxSpeed*-1);
-                Velocity.X = MaxSpeed * thumbsticks.Left.X;
+                //Velocity.X = MaxSpeed * thumbsticks.Left.X;
+                Velocity.X = MaxSpeed*-1;
             }
             else if (Velocity.X < 0)
             {
-                
                 Velocity.X = Math.Min(Velocity.X + Deacceleration, 0);
             }
 
             //Right
-            if (Keyboard.GetState().IsKeyDown(Keys.Right) || GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X > 0)
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) || thumbsticks.Left.X > 0)
             {
                 spriteEffects = SpriteEffects.None;
-                //Velocity.X = Math.Min(Velocity.X + Acceleration, MaxSpeed);
-                Velocity.X = MaxSpeed*thumbsticks.Left.X;
+                //Velocity.X = MaxSpeed*thumbsticks.Left.X;
+                Velocity.X = MaxSpeed;
             }
             else if (Velocity.X > 0)
             {
@@ -72,9 +79,8 @@ namespace ProjectHook
                 
             }
             else if(Velocity.Y < 0 && !(Keyboard.GetState().IsKeyDown(Keys.Z) || GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A)))
-
             {
-                Velocity.Y *=0.9f;
+                Velocity.Y *=0.85f;
             }
 
             //Gravity
@@ -113,20 +119,28 @@ namespace ProjectHook
                 PositionY+=way;
                 temp--;
             }
-            int[] running = {0, 1, 0, 2};
 
+            //Set animations
+            if ((Velocity.X > 0.5f || Velocity.X < -0.5f) && OnGround) ChangeAnimation(Animation.Running);
+            if (Velocity.X > -0.5f && Velocity.X < 0.5f && OnGround) ChangeAnimation(Animation.Idle);
+            
+            //Animations
             AnimationCounter += AnimationSpeed;
-            if (AnimationCounter == 100)
+            if (AnimationCounter >= 100)
             {
                 AnimationCounter = 0;
                 currentFrame++;
-                if (currentFrame == running.Length)
-                {
+                if (currentFrame == CurrentAnimation.Length)
                     currentFrame = 0;
-                }
             }
-            SourceRect = new Rectangle(0, running[currentFrame]*64, 64, 64);
+            SourceRect = new Rectangle(0, CurrentAnimation[currentFrame]*64, 64, 64);
+        }
 
+        public void ChangeAnimation(int[] animation)
+        {
+            if (CurrentAnimation == animation) return;
+            CurrentAnimation = Animation.Running;
+            currentFrame = 0;
         }
     }
 }

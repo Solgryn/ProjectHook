@@ -80,8 +80,10 @@ namespace ProjectHook
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            player.Update(gameTime);
-            cloud.Update(gameTime);
+            foreach (var gameObject in GameObjects)
+            {
+                gameObject.Update(gameTime);
+            }
             base.Update(gameTime);
         }
 
