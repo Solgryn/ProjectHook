@@ -1,13 +1,8 @@
 ﻿#region Using Statements
-using System;
-using System.Collections.Generic;
 using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Storage;
-using Microsoft.Xna.Framework.GamerServices;
 #endregion
 
 namespace ProjectHook
@@ -17,17 +12,16 @@ namespace ProjectHook
     /// </summary>
     public class Game1 : GameHost
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        GraphicsDeviceManager _graphics;
+        SpriteBatch _spriteBatch;
 
-        private Player player;
-        private Cloud cloud;
-
-
+        private Player _player;
+        private Cloud _cloud;
+        
         public Game1()
             : base()
         {
-            graphics = new GraphicsDeviceManager(this);
+            _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
 
@@ -51,14 +45,14 @@ namespace ProjectHook
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
             var fishTx = Content.Load<Texture2D>("fish");
-            player = new Player(this, new Vector2(100, 100), fishTx, PlayerIndex.One);
+            _player = new Player(this, new Vector2(100, 100), fishTx, PlayerIndex.One);
             var cloudTx = Content.Load<Texture2D>("cloud");
-            cloud = new Cloud(this, new Vector2(0,150), cloudTx);
-            GameObjects.Add(cloud);
-            GameObjects.Add(player);
-            
+            _cloud = new Cloud(this, new Vector2(0,150), cloudTx);
+
+            GameObjects.Add(_cloud);
+            GameObjects.Add(_player);
         }
 
         /// <summary>
@@ -80,9 +74,9 @@ namespace ProjectHook
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            foreach (var gameObject in GameObjects)
+            for (var index = 0; index < GameObjects.Count; index++)
             {
-                gameObject.Update(gameTime);
+                GameObjects[index].Update(gameTime);
             }
             base.Update(gameTime);
         }
@@ -95,12 +89,12 @@ namespace ProjectHook
         {
             GraphicsDevice.Clear(Color.LightSkyBlue);
 
-            spriteBatch.Begin();
+            _spriteBatch.Begin();
             foreach (SpriteObject gameObject in GameObjects)
             {
-                gameObject.Draw(gameTime, spriteBatch);
+                gameObject.Draw(gameTime, _spriteBatch);
             }
-            spriteBatch.End();
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }

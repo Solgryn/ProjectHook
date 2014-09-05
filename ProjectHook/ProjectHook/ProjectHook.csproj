@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="Cloud.cs" />
+    <Compile Include="Cooldown.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />
     <Compile Include="GameFrameWork\GameHelper.cs" />
@@ -45,6 +46,7 @@
     <Compile Include="GameFrameWork\MonoLog.cs" />
     <Compile Include="GameFrameWork\SpriteObject.cs" />
     <Compile Include="GameFrameWork\TextObject.cs" />
+    <Compile Include="Hook.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +76,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\fish.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\grapple.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />

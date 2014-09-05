@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,8 +11,8 @@ namespace ProjectHook
         public PlayerIndex PlayerIndex;
 
         public Vector2 Velocity = new Vector2(0, 0);
-        public float Acceleration = 1f;
-        public float Deacceleration = 0.5f;
+        public float Acceleration = 0.6f;
+        public float Deacceleration = 0.4f;
         public float MaxSpeed = 3.5f;
         public float JumpStrength = -10f;
         public bool OnGround = false;
@@ -26,6 +22,8 @@ namespace ProjectHook
         private int _currentFrame;
 
         private bool _jumpKey;
+        private bool _grappleKey;
+        private Cooldown grappleCooldown = new Cooldown(25);
 
         //Animations
         public Animation CurrentAnimation = Animations.Idle;
@@ -47,12 +45,18 @@ namespace ProjectHook
 
         public override void Update(GameTime gameTime)
         {
+            #region Cooldowns
+            grappleCooldown.Decrement();
+            #endregion
+
+            #region Controls
             //Use either gamepad or keyboard
             float controlX;
             if (GamePad.GetState(PlayerIndex).IsConnected)
             {
                 controlX = GamePad.GetState(PlayerIndex).ThumbSticks.Left.X;
                 _jumpKey = GamePad.GetState(PlayerIndex).IsButtonDown(Buttons.A);
+                _grappleKey = GamePad.GetState(PlayerIndex).IsButtonDown(Buttons.B);
             }
             else
             {
@@ -62,6 +66,7 @@ namespace ProjectHook
                 if (Keyboard.GetState().IsKeyDown(Keys.Right))
                     controlX = 1;
                 _jumpKey = Keyboard.GetState().IsKeyDown(Keys.Z);
+                _grappleKey = Keyboard.GetState().IsKeyDown(Keys.X);
             }
 
             //Controls
@@ -100,7 +105,16 @@ namespace ProjectHook
             {
                 Velocity.Y *=0.85f;
             }
+            
+            //Hook
+            if (_grappleKey && grappleCooldown.IsOff())
+            {
+                ThrowHook();
+                grappleCooldown.GoOnCooldown();
+            }
+            #endregion
 
+            #region Moving the player
             //Apply Gravity
             if(!OnGround)
                 Velocity.Y += 0.35f;
@@ -138,7 +152,9 @@ namespace ProjectHook
                 PositionY+=way;
                 temp--;
             }
+            #endregion
 
+            #region Animations
             //Set animations
             if (Velocity.X == 0 && OnGround)
                 ChangeAnimation(Animations.Idle);
@@ -158,6 +174,7 @@ namespace ProjectHook
                 if (_currentFrame == CurrentAnimation.Length)
                     _currentFrame = 0;
             }
+            #endregion
 
             //Set texture image
             SourceRect = new Rectangle(0, (CurrentAnimation.Frames[_currentFrame]*64)+1, 64, 64);
@@ -169,6 +186,19 @@ namespace ProjectHook
             CurrentAnimation = animation;
             _animationSpeed = animation.Speed;
             _currentFrame = 0;
+        }
+
+        public void ThrowHook()
+        {
+            var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), new Vector2(GetDirection()*10, 0));
+            Game.GameObjects.Add(hook);
+        }
+
+        public int GetDirection()
+        {
+            if (spriteEffects == SpriteEffects.FlipHorizontally) return -1;
+            if (spriteEffects == SpriteEffects.None) return 1;
+            return 0;
         }
     }
 }
