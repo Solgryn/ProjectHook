@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectHook.GameFrameWork;
 
 namespace ProjectHook
 {
     public sealed class Player : SpriteObject
     {
-        //Hej :D
         private readonly PlayerIndex _playerIndex;
-        private int _playerIndexInt;
+        private readonly int _playerIndexInt;
 
         public Vector2 Velocity = new Vector2(0, 0);
         public float Acceleration = 0.6f;
@@ -19,7 +20,7 @@ namespace ProjectHook
         public float MaxSpeed = 3.5f;
         public float JumpStrength = -10f;
         public bool OnGround = false;
-        public bool canJump = true;
+        public bool CanJump = true;
 
         private double _animationCounter;
         private double _animationSpeed;
@@ -105,9 +106,17 @@ namespace ProjectHook
             float controlX;
             if (GamePad.GetState(_playerIndex).IsConnected)
             {
-                controlX = GamePad.GetState(_playerIndex).ThumbSticks.Left.X;
-                _jumpKey = GamePad.GetState(_playerIndex).IsButtonDown(Buttons.A);
-                _grappleKey = GamePad.GetState(_playerIndex).IsButtonDown(Buttons.B);
+                var gamepadState = GamePad.GetState(_playerIndex);
+
+                controlX = gamepadState.ThumbSticks.Left.X; //Control via stick
+
+                if (gamepadState.DPad.Right == ButtonState.Pressed) //Control via DPad
+                    controlX++;
+                if (gamepadState.DPad.Left == ButtonState.Pressed)
+                    controlX--;
+
+                _jumpKey = gamepadState.IsButtonDown(Buttons.A);
+                _grappleKey = gamepadState.IsButtonDown(Buttons.B);
             }
             else
             {
@@ -119,6 +128,8 @@ namespace ProjectHook
                 _jumpKey = Keyboard.GetState().IsKeyDown(Keys.Z);
                 _grappleKey = Keyboard.GetState().IsKeyDown(Keys.X);
             }
+
+            MathHelper.Clamp(controlX, -1, 1);
 
             //Walk Left
             if (controlX < 0 && CanControl && Velocity.X > -MaxSpeed)
@@ -145,10 +156,10 @@ namespace ProjectHook
             }
 
             //Jump
-            if (_jumpKey && canJump && CanControl)
+            if (_jumpKey && CanJump && CanControl)
             {
                 Velocity.Y = JumpStrength;
-                canJump = false;
+                CanJump = false;
             }
                 //If jump key isn't held, shorten the jump
             else if(Velocity.Y < 0 && !_jumpKey)
@@ -216,7 +227,7 @@ namespace ProjectHook
 
                 //Is off the ground
                 if (!OverlapsSolid(Detector.Down))
-                    canJump = false;
+                    CanJump = false;
 
                 //Hit the ceiling
                 if (OverlapsSolid(Detector.Up) && Velocity.Y < 0)
@@ -229,7 +240,7 @@ namespace ProjectHook
                 if (OverlapsSolid(Detector.Down) && Velocity.Y > 0)
                 {
                     OnGround = true;
-                    canJump = true;
+                    CanJump = true;
                     Velocity.Y = 0;
                     break;
                 }
@@ -244,6 +255,9 @@ namespace ProjectHook
                 temp--;
             }
             #endregion
+
+            if (IsOutOfFrame())
+                Die();
 
             #region Animations
             //Set animations
@@ -313,14 +327,9 @@ namespace ProjectHook
             CantControlFor = 15;
         }
 
-        public bool OverlapsSolid(Rectangle hitbox)
+        public void Die()
         {
-            foreach (var tile in Collections.Tiles)
-            {
-                if (hitbox.Intersects(tile.BoundingBox) && tile.LayerName == "Solid")
-                    return true;
-            }
-            return false;
+            Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y);
         }
     }
 }

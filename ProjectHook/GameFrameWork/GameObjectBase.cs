@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace GrappleRace.GameFrameWork
+namespace ProjectHook.GameFrameWork
 {
     public abstract class GameObjectBase
     {

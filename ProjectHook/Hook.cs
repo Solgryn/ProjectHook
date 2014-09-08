@@ -5,10 +5,11 @@ using System.Text;
 using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ProjectHook.GameFrameWork;
 
 namespace ProjectHook
 {
-    public class Hook : SpriteObject
+    public sealed class Hook : SpriteObject
     {
         public Vector2 Pull = new Vector2(10, -7.5f);
         private readonly Player _player;
@@ -37,16 +38,17 @@ namespace ProjectHook
 
         public override void Update(GameTime gameTime)
         {
-            Position = _player.Position;
+            Position = _player.Position; //Set the hook to the player
 
-            //ScaleX = _life / _maxLife;
-            ScaleX = ScaleX + (1 - ScaleX)*0.25f;
+            ScaleX = ScaleX + (1 - ScaleX)*0.25f; //Gradually scale hook outwards
+
+            //Destroy hook after some time
             _life++;
-            if (_life == _maxLife)
+            if (_life >= _maxLife)
                 Destroy();
 
 
-            //Hook hits other player
+            //Hook hits another player
             foreach (var player in Collections.Players)
             {
                 if (player != _player)
@@ -59,14 +61,11 @@ namespace ProjectHook
                 }
             }
 
-            //Hook hits ground
-            foreach (var tile in Collections.Tiles)
+            //Hook hits solid
+            if (OverlapsSolid(BoundingBox))
             {
-                if (Overlaps(tile) && tile.LayerName == "Solid")
-                {
-                    _player.HookHit(this);
-                    Destroy();
-                }
+                _player.HookHit(this);
+                Destroy();
             }
         }
     }

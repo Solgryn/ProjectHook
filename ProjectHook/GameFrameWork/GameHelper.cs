@@ -1,6 +1,6 @@
 using System;
 
-namespace GrappleRace.GameFrameWork
+namespace ProjectHook.GameFrameWork
 {
     public static class GameHelper
     {

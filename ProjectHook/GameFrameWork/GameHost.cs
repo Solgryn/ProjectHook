@@ -1,13 +1,14 @@
 using System.Collections.Generic;
+using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GrappleRace.GameFrameWork
+namespace ProjectHook.GameFrameWork
 {
     // Derive GameHost from the XNA Game class.
     // Our actual game classes can then derive from GameHost
     // in order to pick up all of the functionality added here.
-    public class GameHost : Microsoft.Xna.Framework.Game
+    public class GameHost : Game
     {
 
         //-------------------------------------------------------------------------------------

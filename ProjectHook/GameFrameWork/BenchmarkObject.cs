@@ -1,8 +1,9 @@
 using System.Text;
+using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GrappleRace.GameFrameWork
+namespace ProjectHook.GameFrameWork
 {
     public class BenchmarkObject : TextObject
     {
@@ -15,7 +16,7 @@ namespace GrappleRace.GameFrameWork
         private int _lastUpdateCount;
 
         // Create a single StringBuilder instance to avoid creating objects each update
-        private StringBuilder _strBuilder = new StringBuilder();
+        private readonly StringBuilder _strBuilder = new StringBuilder();
 
         //-------------------------------------------------------------------------------------
         // Class constructors
@@ -29,10 +30,6 @@ namespace GrappleRace.GameFrameWork
 
         public override void Update(GameTime gameTime)
         {
-            int newDrawCount;
-            int newUpdateCount;
-            double newElapsedTime;
-
             // Allow the base class to do its stuff
             base.Update(gameTime);
 
@@ -40,11 +37,11 @@ namespace GrappleRace.GameFrameWork
             if (gameTime.TotalGameTime.TotalMilliseconds > _lastUpdateMilliseconds + 1000)
             {
                 // Find how many frames have been drawn within the last second
-                newDrawCount = _drawCount - _lastDrawCount;
+                var newDrawCount = _drawCount - _lastDrawCount;
                 // Find how many updates have taken place within the last second
-                newUpdateCount = UpdateCount - _lastUpdateCount;
+                var newUpdateCount = UpdateCount - _lastUpdateCount;
                 // Find out exactly how much time has passed
-                newElapsedTime = gameTime.TotalGameTime.TotalMilliseconds - _lastUpdateMilliseconds;
+                var newElapsedTime = gameTime.TotalGameTime.TotalMilliseconds - _lastUpdateMilliseconds;
 
                 // Build a message to display the details and set it into the Text property
                 _strBuilder.Length = 0;

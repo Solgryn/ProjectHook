@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ProjectHook;
 using ProjectHook.GameFrameWork;
 
 namespace GrappleRace.GameFrameWork
@@ -139,7 +140,7 @@ namespace GrappleRace.GameFrameWork
             }
         }
 
-        //Sprite effects (CUSTOM)
+        //Change sprite effects
         public SpriteEffects spriteEffects { get; set; }
 
         /// <summary>
@@ -153,7 +154,7 @@ namespace GrappleRace.GameFrameWork
             {
                 Rectangle result;
                 Vector2 spritesize;
-                Vector2 spriteoffset = new Vector2(0, 0);
+                var spriteoffset = new Vector2(0, 0);
 
                 if (_boundingBox.IsEmpty)
                 {
@@ -193,7 +194,6 @@ namespace GrappleRace.GameFrameWork
 
         private Rectangle _boundingBox;
 
-
         //-------------------------------------------------------------------------------------
         // Game functions
 
@@ -225,13 +225,24 @@ namespace GrappleRace.GameFrameWork
             }
         }
 
-        //CUSTOM
+        //If object overlaps another
         public virtual bool Overlaps(SpriteObject other)
         {
             return BoundingBox.Intersects(other.BoundingBox);
         }
 
-        //CUSTOM
+        //Check if the object is overlapping a solid tile
+        public bool OverlapsSolid(Rectangle hitbox)
+        {
+            foreach (var tile in Collections.Tiles)
+            {
+                if (hitbox.Intersects(tile.BoundingBox) && tile.LayerName == "Solid")
+                    return true;
+            }
+            return false;
+        }
+
+        //Get -1 if facing left, 1 is facing right
         public int GetDirection()
         {
             if (spriteEffects == SpriteEffects.FlipHorizontally) return -1;
@@ -239,10 +250,19 @@ namespace GrappleRace.GameFrameWork
             return 0;
         }
 
-        //CUSTOM
+        //Remove the object from the game
         public virtual void Destroy()
         {
             Game.GameObjects.Remove(this);
+        }
+
+        //Check if object is out of the visible screen
+        public bool IsOutOfFrame()
+        {
+            return (PositionX < Camera.Position.X ||
+                    PositionX > Camera.Position.X + Camera.Width ||
+                    PositionY < Camera.Position.Y ||
+                    PositionY > Camera.Position.Y + Camera.Height);
         }
     }
 }

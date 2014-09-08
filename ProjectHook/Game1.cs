@@ -1,7 +1,6 @@
 ﻿#region Using Statements
 
-using System;
-using System.Diagnostics;
+using System.Linq;
 using GrappleRace.GameFrameWork;
 using LevelReader.GameFrameWork;
 using Microsoft.Xna.Framework;
@@ -18,10 +17,12 @@ namespace ProjectHook
     /// </summary>
     public class Game1 : GameHost
     {
-        enum Levels
+        public enum Level
         {
             Level1
         }
+
+        public Level CurrentLevel;
 
         GraphicsDeviceManager _graphics;
         SpriteBatch _spriteBatch;
@@ -42,10 +43,13 @@ namespace ProjectHook
         private bool _canPressKey = true; //Make sure key press doesn't loop
         
         public Game1()
-            : base()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            //Change screen size
+            _graphics.PreferredBackBufferWidth = Camera.Width;
+            _graphics.PreferredBackBufferHeight = Camera.Height;
         }
 
         /// <summary>
@@ -84,13 +88,10 @@ namespace ProjectHook
 
             //Tiles
             _tiles = Content.Load<Texture2D>("tiles");
-
             _font = Content.Load<SpriteFont>("MonoLog");
-
             _level = new TiledMap("Levels/Level1.tmx");
 
             _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level, _font);
-            //_mapObject.Scale = new Vector2(2,2);
             GameObjects.Add(_mapObject);
         }
 
@@ -100,7 +101,9 @@ namespace ProjectHook
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            GameObjects.Clear();
+            Collections.Players.Clear();
+            Collections.Tiles.Clear();
         }
 
         /// <summary>
@@ -111,10 +114,8 @@ namespace ProjectHook
         protected override void Update(GameTime gameTime)
         {
             //Camera
-            Camera.Position.X = ((_player1.PositionX + _player2.PositionX) / 2) - 250;
+            Camera.Position.X = Collections.Players.Average(player => player.PositionX) - 250; //Set x position to average of all players
             Camera.Position.Y = 100;
-
-
 
             //Toggle drawing of hitboxes
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && _canPressKey)
@@ -179,6 +180,13 @@ namespace ProjectHook
             }
             rectangleTexture.SetData(color);//set the color data on the texture
             return rectangleTexture;//return the texture
+        }
+
+        public void GoToLevel(Level level)
+        {
+            UnloadContent();
+            CurrentLevel = level;
+            LoadContent();
         }
     }
 }

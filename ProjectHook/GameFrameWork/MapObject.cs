@@ -4,6 +4,7 @@ using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ProjectHook;
+using ProjectHook.GameFrameWork;
 
 namespace LevelReader.GameFrameWork
 {
@@ -43,10 +44,11 @@ namespace LevelReader.GameFrameWork
                 {
                     for (var j = 0; j < _tiledMap.Height; j++)
                     {
-                        int gidValue = _tiledMap.Layers[layername][j, i];
+                        var gidValue = _tiledMap.Layers[layername][j, i];
 
                         if (gidValue != 0)
                         {
+                            _tilesPrRow = Math.Max(_tilesPrRow, 1);
                             var x = (gidValue - 1) % _tilesPrRow * (_tiledMap.TileWidth + _tiledMap.TileSetSpacing);
                             var y = ((gidValue - 1) / _tilesPrRow) * (_tiledMap.TileHeight + _tiledMap.TileSetSpacing);
                             var tile = new Tile
