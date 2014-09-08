@@ -152,17 +152,27 @@ namespace GrappleRace.GameFrameWork
             {
                 Rectangle result;
                 Vector2 spritesize;
+                Vector2 spriteoffset = new Vector2(0, 0);
 
-                if (SourceRect.IsEmpty)
+                if (_boundingBox.IsEmpty)
                 {
-                    // The size is that of the whole texture
-                    spritesize = new Vector2(SpriteTexture.Width, SpriteTexture.Height);
+                    if (SourceRect.IsEmpty)
+                    {
+                        // The size is that of the whole texture
+                        spritesize = new Vector2(SpriteTexture.Width, SpriteTexture.Height);
+                    }
+                    else
+                    {
+                        // The size is that of the rectangle
+                        spritesize = new Vector2(SourceRect.Width, SourceRect.Height);
+                    }
                 }
                 else
                 {
-                    // The size is that of the rectangle
-                    spritesize = new Vector2(SourceRect.Width, SourceRect.Height);
+                    spriteoffset = new Vector2(_boundingBox.X, _boundingBox.Y);
+                    spritesize = new Vector2(_boundingBox.Width, _boundingBox.Height);
                 }
+                
 
                 // Build a rectangle whose position and size matches that of the sprite
                 // (taking scaling into account for the size)
@@ -171,10 +181,16 @@ namespace GrappleRace.GameFrameWork
                 // Offset the sprite by the origin
                 result.Offset((int)(-OriginX * ScaleX), (int)(-OriginY * ScaleY));
 
+
+                result.Offset((int)(spriteoffset.X), (int)(spriteoffset.Y));
+
                 // Return the finished rectangle
                 return result;
             }
+            set { _boundingBox = value; }
         }
+
+        private Rectangle _boundingBox;
 
 
         //-------------------------------------------------------------------------------------

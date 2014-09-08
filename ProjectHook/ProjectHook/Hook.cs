@@ -25,10 +25,14 @@ namespace ProjectHook
             spriteEffects = _player.spriteEffects;
             ScaleX = 0;
 
+            //Set origin
             if (spriteEffects == SpriteEffects.FlipHorizontally)
                 OriginX = SpriteTexture.Width;
 
             OriginY = SpriteTexture.Height / 2.0f;
+
+            //Set hitbox
+            BoundingBox = new Rectangle(0, 24, SpriteTexture.Width, 16);
         }
 
         public override void Update(GameTime gameTime)
@@ -41,6 +45,8 @@ namespace ProjectHook
             if (_life == _maxLife)
                 Destroy();
 
+
+            //Hook hits other player
             foreach (var player in Collections.Players)
             {
                 if (player != _player)
@@ -52,6 +58,16 @@ namespace ProjectHook
                     }
                 }
 
+            }
+
+            //Hook hits ground
+            foreach (var tile in Collections.Tiles)
+            {
+                if (Overlaps(tile) && tile.LayerName == "Solid")
+                {
+                    _player.HookHit(this);
+                    Destroy();
+                }
             }
         }
     }

@@ -68,10 +68,10 @@ namespace ProjectHook
 
             GameObjects.Add(_cloud);
             GameObjects.Add(_player1);
-            GameObjects.Add(_player2);
+            //GameObjects.Add(_player2);
 
             Collections.Players.Add(_player1);
-            Collections.Players.Add(_player2);
+            //Collections.Players.Add(_player2);
 
             //Tiles
             _tiles = Content.Load<Texture2D>("tiles");
@@ -128,9 +128,28 @@ namespace ProjectHook
             {
                 tile.Draw(gameTime, _spriteBatch);
             }
+
+            //Draw hitboxes
+            foreach (SpriteObject gameObject in GameObjects)
+            {
+                _spriteBatch.Draw(generateTexture2D(gameObject.BoundingBox.Width, gameObject.BoundingBox.Height, Color.Red), new Vector2(gameObject.BoundingBox.Location.X, gameObject.BoundingBox.Location.Y));
+            }
+
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private Texture2D generateTexture2D(int width, int height, Color textureColor)
+        {
+            Texture2D rectangleTexture = new Texture2D(this.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+            Color[] color = new Color[width * height];
+            for (int i = 0; i < color.Length; i++)
+            {
+                color[i] = textureColor;
+            }
+            rectangleTexture.SetData(color);//set the color data on the texture
+            return rectangleTexture;//return the texture
         }
     }
 }

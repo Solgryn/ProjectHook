@@ -25,17 +25,26 @@ namespace ProjectHook
         private double _animationSpeed;
         private int _currentFrame;
 
-        private Rectangle _leftDetector;
-        private Rectangle _rightDetector;
-        private Rectangle _downDetector;
-        private Rectangle _upDetector;
+        internal class Detector
+        {
+            public static Rectangle Left;
+            public static Rectangle Right;
+            public static Rectangle Down;
+            public static Rectangle Up;
+
+            public static readonly float XOffset = 16;
+            public static readonly float YOffset = 16;
+            public static readonly int Width = 32;
+            public static readonly int Height = 47;
+        }
+
 
         public bool CanControl = true;
         public int CantControlFor;
 
         private bool _jumpKey;
         private bool _grappleKey;
-        private readonly Cooldown _grappleCooldown = new Cooldown(60);
+        private readonly Cooldown _grappleCooldown = new Cooldown(40);
 
         //Animations
         public Animation CurrentAnimation = Animations.Idle;
@@ -68,7 +77,7 @@ namespace ProjectHook
                     _playerIndexInt = 0;
                     break;
             }
-            //BoundingBox = new Rectangle(16, 16, 32, 48);
+            BoundingBox = new Rectangle(16, 16, 32, 48);
         }
 
         public override void Update(GameTime gameTime)
@@ -76,7 +85,9 @@ namespace ProjectHook
             OnGround = false;
 
             #region Cooldowns
+            //Manage cooldowns
             _grappleCooldown.Decrement();
+            //Can't control for x frames
             if (CantControlFor > 0)
             {
                 CanControl = false;
@@ -90,7 +101,7 @@ namespace ProjectHook
             #endregion
 
             #region Controls
-            //Use either gamepad or keyboard
+            //Use either gamepad or keyboard for input
             float controlX;
             if (GamePad.GetState(_playerIndex).IsConnected)
             {
@@ -109,25 +120,25 @@ namespace ProjectHook
                 _grappleKey = Keyboard.GetState().IsKeyDown(Keys.X);
             }
 
-            //Controls
-            
-            //Left
+            //Walk Left
             if (controlX < 0 && CanControl)
             {
                 spriteEffects = SpriteEffects.FlipHorizontally;
                 Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
             }
+                //Deccelerate to the left
             else if (Velocity.X < 0)
             {
                 Velocity.X = Math.Min(Velocity.X + Deacceleration, 0);
             }
 
-            //Right
+            //Walk Right
             if (controlX > 0 && CanControl)
             {
                 spriteEffects = SpriteEffects.None;
                 Velocity.X = Math.Min(Velocity.X + Acceleration, controlX * MaxSpeed);
             }
+                //Deccelerate to the right
             else if (Velocity.X > 0)
             {
                 Velocity.X = Math.Max(Velocity.X - Deacceleration, 0);
@@ -139,12 +150,13 @@ namespace ProjectHook
                 Velocity.Y = JumpStrength;
                 canJump = false;
             }
+                //If jump key isn't held, shorten the jump
             else if(Velocity.Y < 0 && !_jumpKey)
             {
                 Velocity.Y *=0.85f;
             }
             
-            //Hook
+            //Shoot Hook
             if (_grappleKey && _grappleCooldown.IsOff() && CanControl)
             {
                 ThrowHook();
@@ -157,26 +169,32 @@ namespace ProjectHook
             if(!OnGround)
                 Velocity.Y += 0.35f;
 
+            //Here we move the player 1 pixel at a time, and check for collisions per pixel
+
             //X
             var temp = Math.Abs(Velocity.X);
             var way = MathHelper.Clamp(Velocity.X, -1, 1);
             for (var i = 0; i < Math.Abs(Velocity.X); i++)
             {
                 //Update hit detecors
-                _leftDetector = new Rectangle((int)(PositionX - 16f), (int)(PositionY - 16f), 8, 32);
-                _rightDetector = new Rectangle((int)(PositionX + 16f), (int)(PositionY - 16f), 8, 32);
+                Detector.Left = new Rectangle((int)(PositionX - Detector.XOffset), (int)(PositionY - Detector.YOffset), 1, Detector.Height);
+                Detector.Right = new Rectangle((int)(PositionX + Detector.XOffset), (int)(PositionY - Detector.YOffset), 1, Detector.Height);
 
-                //Overlaps right obstacle
-                if (OverlapsSolid(_rightDetector) && Velocity.X > 0)
+                //Overlaps obstacles
+                if (OverlapsSolid(Detector.Right) && Velocity.X > 0 ||
+                    OverlapsSolid(Detector.Left) && Velocity.X < 0)
+                {
+                    Velocity.X = 0;
                     break;
-                //Overlaps left obstacle
-                if (OverlapsSolid(_leftDetector) && Velocity.X < 0)
-                    break;
+                }
+                    
+                //If movement is less than 1, move the rest
                 if (temp < 1)
                 {
                     PositionX += temp*way;
                     break;
                 }
+                //Move a pixel
                 PositionX+=way;
                 temp--;
             }
@@ -187,29 +205,35 @@ namespace ProjectHook
             for (var i = 0; i < Math.Abs(Velocity.Y); i++)
             {
                 //Update hit detectors
-                _upDetector = new Rectangle((int)(PositionX - 16f), (int)(PositionY - 24f), 32, 8);
-                _downDetector = new Rectangle((int)(PositionX - 16f), (int)(PositionY + 24f), 32, 8);
+                Detector.Up = new Rectangle((int)(PositionX - Detector.XOffset + 2), (int)(PositionY - 16f), Detector.Width - 4, 1);
+                Detector.Down = new Rectangle((int)(PositionX - Detector.XOffset + 2), (int)(PositionY + 31), Detector.Width - 4, 1);
+
+                //Is off the ground
+                if (!OverlapsSolid(Detector.Down))
+                    canJump = false;
 
                 //Hit the ceiling
-                if (OverlapsSolid(_upDetector) && Velocity.Y < 0)
+                if (OverlapsSolid(Detector.Up) && Velocity.Y < 0)
                 {
                     Velocity.Y = 0;
                     break;
                 }
 
                 //Hit the ground
-                if (OverlapsSolid(_downDetector) && Velocity.Y > 0)
+                if (OverlapsSolid(Detector.Down) && Velocity.Y > 0)
                 {
                     OnGround = true;
                     canJump = true;
                     Velocity.Y = 0;
                     break;
                 }
+                //If movement is less than 1, move the rest
                 if (temp < 1)
                 {
                     PositionY+=temp*way;
                     break;
                 }
+                //Move a pixel
                 PositionY+=way;
                 temp--;
             }
@@ -237,7 +261,7 @@ namespace ProjectHook
             }
             #endregion
 
-            //Set texture image
+            //Update texture image
             SourceRect = new Rectangle(64 * _playerIndexInt, (CurrentAnimation.Frames[_currentFrame] * 64) + 1, 64, 64);
         }
 
@@ -255,10 +279,12 @@ namespace ProjectHook
             Game.GameObjects.Add(hook);
         }
 
+        //Player gets hit by hook
         public void GetHit(Hook hook, Player player)
         {
-            var hookDirection = hook.GetDirection();
+            var hookDirection = hook.GetDirection(); //Get direction of hook (either -1 or 1)
 
+            //Set velocities of players depending on the direction of the hook
             Velocity.Y = hook.Pull.Y;
             Velocity.X = (hook.Pull.X * hookDirection ) * -1f;
             player.Velocity.X = hook.Pull.X * hookDirection;
@@ -266,7 +292,19 @@ namespace ProjectHook
             player.OnGround = false;
             OnGround = false;
 
+            //Player can't control for a little bit
             CantControlFor = 20;
+        }
+
+        //Hook hits tile
+        public void HookHit(Hook hook)
+        {
+            //Set velocity of player 
+            Velocity.Y = hook.Pull.Y * 2;
+            Velocity.X = (hook.Pull.X * hook.GetDirection()) * 1.5f;
+
+            //Player can't control for a little bit
+            CantControlFor = 10;
         }
 
         public bool OverlapsSolid(Rectangle hitbox)
