@@ -8,6 +8,7 @@ namespace ProjectHook
 {
     sealed class Player : SpriteObject
     {
+        //Hej :D
         public PlayerIndex PlayerIndex;
 
         public Vector2 Velocity = new Vector2(0, 0);
