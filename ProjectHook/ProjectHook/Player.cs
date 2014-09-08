@@ -19,10 +19,16 @@ namespace ProjectHook
         public float MaxSpeed = 3.5f;
         public float JumpStrength = -10f;
         public bool OnGround = false;
+        public bool canJump = true;
 
         private double _animationCounter;
         private double _animationSpeed;
         private int _currentFrame;
+
+        private Rectangle _leftDetector;
+        private Rectangle _rightDetector;
+        private Rectangle _downDetector;
+        private Rectangle _upDetector;
 
         public bool CanControl = true;
         public int CantControlFor;
@@ -62,12 +68,13 @@ namespace ProjectHook
                     _playerIndexInt = 0;
                     break;
             }
-
             //BoundingBox = new Rectangle(16, 16, 32, 48);
         }
 
         public override void Update(GameTime gameTime)
         {
+            OnGround = false;
+
             #region Cooldowns
             _grappleCooldown.Decrement();
             if (CantControlFor > 0)
@@ -127,12 +134,10 @@ namespace ProjectHook
             }
 
             //Jump
-            if (_jumpKey && OnGround && CanControl)
+            if (_jumpKey && canJump && CanControl)
             {
-
                 Velocity.Y = JumpStrength;
-                OnGround = false;
-                
+                canJump = false;
             }
             else if(Velocity.Y < 0 && !_jumpKey)
             {
@@ -157,6 +162,16 @@ namespace ProjectHook
             var way = MathHelper.Clamp(Velocity.X, -1, 1);
             for (var i = 0; i < Math.Abs(Velocity.X); i++)
             {
+                //Update hit detecors
+                _leftDetector = new Rectangle((int)(PositionX - 16f), (int)(PositionY - 16f), 8, 32);
+                _rightDetector = new Rectangle((int)(PositionX + 16f), (int)(PositionY - 16f), 8, 32);
+
+                //Overlaps right obstacle
+                if (OverlapsSolid(_rightDetector) && Velocity.X > 0)
+                    break;
+                //Overlaps left obstacle
+                if (OverlapsSolid(_leftDetector) && Velocity.X < 0)
+                    break;
                 if (temp < 1)
                 {
                     PositionX += temp*way;
@@ -171,9 +186,22 @@ namespace ProjectHook
             way = MathHelper.Clamp(Velocity.Y, -1, 1);
             for (var i = 0; i < Math.Abs(Velocity.Y); i++)
             {
-                if (PositionY > 350 && Velocity.Y > 0)
+                //Update hit detectors
+                _upDetector = new Rectangle((int)(PositionX - 16f), (int)(PositionY - 24f), 32, 8);
+                _downDetector = new Rectangle((int)(PositionX - 16f), (int)(PositionY + 24f), 32, 8);
+
+                //Hit the ceiling
+                if (OverlapsSolid(_upDetector) && Velocity.Y < 0)
+                {
+                    Velocity.Y = 0;
+                    break;
+                }
+
+                //Hit the ground
+                if (OverlapsSolid(_downDetector) && Velocity.Y > 0)
                 {
                     OnGround = true;
+                    canJump = true;
                     Velocity.Y = 0;
                     break;
                 }
@@ -241,6 +269,14 @@ namespace ProjectHook
             CantControlFor = 20;
         }
 
-        
+        public bool OverlapsSolid(Rectangle hitbox)
+        {
+            foreach (var tile in Collections.Tiles)
+            {
+                if (hitbox.Intersects(tile.BoundingBox) && tile.LayerName == "Solid")
+                    return true;
+            }
+            return false;
+        }
     }
 }

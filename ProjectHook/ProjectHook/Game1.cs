@@ -1,5 +1,6 @@
 ﻿#region Using Statements
 using GrappleRace.GameFrameWork;
+using LevelReader.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -23,6 +24,13 @@ namespace ProjectHook
         private Player _player1;
         private Player _player2;
         private Cloud _cloud;
+
+        private Texture2D _tiles;
+        private TiledMap _level;
+        private bool _levelLoaded = false;
+        private string _levelInfo;
+        private SpriteFont _font;
+        private MapObject _mapObject;
         
         public Game1()
             : base()
@@ -64,6 +72,17 @@ namespace ProjectHook
 
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
+
+            //Tiles
+            _tiles = Content.Load<Texture2D>("tiles");
+
+            _font = Content.Load<SpriteFont>("MonoLog");
+
+            _level = new TiledMap("Levels/Level1.tmx");
+
+            _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level, _font);
+            //_mapObject.Scale = new Vector2(2,2);
+            GameObjects.Add(_mapObject);
         }
 
         /// <summary>
@@ -104,6 +123,10 @@ namespace ProjectHook
             foreach (SpriteObject gameObject in GameObjects)
             {
                 gameObject.Draw(gameTime, _spriteBatch);
+            }
+            foreach (var tile in Collections.Tiles)
+            {
+                tile.Draw(gameTime, _spriteBatch);
             }
             _spriteBatch.End();
 

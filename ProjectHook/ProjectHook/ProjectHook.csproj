@@ -44,13 +44,16 @@
     <Compile Include="GameFrameWork\GameHelper.cs" />
     <Compile Include="GameFrameWork\GameHost.cs" />
     <Compile Include="GameFrameWork\GameObjectBase.cs" />
+    <Compile Include="GameFrameWork\MapObject.cs" />
     <Compile Include="GameFrameWork\MonoLog.cs" />
     <Compile Include="GameFrameWork\SpriteObject.cs" />
     <Compile Include="GameFrameWork\TextObject.cs" />
+    <Compile Include="GameFrameWork\TiledMap.cs" />
     <Compile Include="Hook.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tile.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
@@ -82,9 +85,19 @@
     <Content Include="Content\grapple.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\tiles.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Icon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Levels\Level1.tmx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\MonoLog.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
