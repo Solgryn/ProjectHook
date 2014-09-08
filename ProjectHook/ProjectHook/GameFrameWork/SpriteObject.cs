@@ -207,9 +207,24 @@ namespace GrappleRace.GameFrameWork
             }
         }
 
+        //CUSTOM
         public virtual bool Overlaps(SpriteObject other)
         {
             return BoundingBox.Intersects(other.BoundingBox);
+        }
+
+        //CUSTOM
+        public int GetDirection()
+        {
+            if (spriteEffects == SpriteEffects.FlipHorizontally) return -1;
+            if (spriteEffects == SpriteEffects.None) return 1;
+            return 0;
+        }
+
+        //CUSTOM
+        public virtual void Destroy()
+        {
+            Game.GameObjects.Remove(this);
         }
     }
 }

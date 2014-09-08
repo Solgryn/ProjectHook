@@ -12,10 +12,16 @@ namespace ProjectHook
     /// </summary>
     public class Game1 : GameHost
     {
+        enum Levels
+        {
+            Level1
+        }
+
         GraphicsDeviceManager _graphics;
         SpriteBatch _spriteBatch;
 
-        private Player _player;
+        private Player _player1;
+        private Player _player2;
         private Cloud _cloud;
         
         public Game1()
@@ -47,12 +53,17 @@ namespace ProjectHook
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             var fishTx = Content.Load<Texture2D>("fish");
-            _player = new Player(this, new Vector2(100, 100), fishTx, PlayerIndex.One);
+            _player1 = new Player(this, new Vector2(100, 100), fishTx, PlayerIndex.One);
+            _player2 = new Player(this, new Vector2(200, 100), fishTx, PlayerIndex.Two);
             var cloudTx = Content.Load<Texture2D>("cloud");
             _cloud = new Cloud(this, new Vector2(0,150), cloudTx);
 
             GameObjects.Add(_cloud);
-            GameObjects.Add(_player);
+            GameObjects.Add(_player1);
+            GameObjects.Add(_player2);
+
+            Collections.Players.Add(_player1);
+            Collections.Players.Add(_player2);
         }
 
         /// <summary>

@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="Cloud.cs" />
+    <Compile Include="Collections.cs" />
     <Compile Include="Cooldown.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,10 +7,11 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ProjectHook
 {
-    sealed class Player : SpriteObject
+    public sealed class Player : SpriteObject
     {
         //Hej :D
-        public PlayerIndex PlayerIndex;
+        private readonly PlayerIndex _playerIndex;
+        private int _playerIndexInt;
 
         public Vector2 Velocity = new Vector2(0, 0);
         public float Acceleration = 0.6f;
@@ -22,9 +24,12 @@ namespace ProjectHook
         private double _animationSpeed;
         private int _currentFrame;
 
+        public bool CanControl = true;
+        public int CantControlFor;
+
         private bool _jumpKey;
         private bool _grappleKey;
-        private Cooldown grappleCooldown = new Cooldown(25);
+        private readonly Cooldown _grappleCooldown = new Cooldown(60);
 
         //Animations
         public Animation CurrentAnimation = Animations.Idle;
@@ -40,24 +45,51 @@ namespace ProjectHook
             : base(game, position, texture)
         {
             SpriteTexture = texture;
-            PlayerIndex = playerIndex;
+            _playerIndex = playerIndex;
 
+            OriginX = 32;
+            OriginY = 32;
+
+            switch (_playerIndex)
+            {
+                case PlayerIndex.One:
+                    _playerIndexInt = 0;
+                    break;
+                case PlayerIndex.Two:
+                    _playerIndexInt = 1;
+                    break;
+                default:
+                    _playerIndexInt = 0;
+                    break;
+            }
+
+            //BoundingBox = new Rectangle(16, 16, 32, 48);
         }
 
         public override void Update(GameTime gameTime)
         {
             #region Cooldowns
-            grappleCooldown.Decrement();
+            _grappleCooldown.Decrement();
+            if (CantControlFor > 0)
+            {
+                CanControl = false;
+                CantControlFor--;
+            }
+            else
+            {
+                CanControl = true;
+            }
+                
             #endregion
 
             #region Controls
             //Use either gamepad or keyboard
             float controlX;
-            if (GamePad.GetState(PlayerIndex).IsConnected)
+            if (GamePad.GetState(_playerIndex).IsConnected)
             {
-                controlX = GamePad.GetState(PlayerIndex).ThumbSticks.Left.X;
-                _jumpKey = GamePad.GetState(PlayerIndex).IsButtonDown(Buttons.A);
-                _grappleKey = GamePad.GetState(PlayerIndex).IsButtonDown(Buttons.B);
+                controlX = GamePad.GetState(_playerIndex).ThumbSticks.Left.X;
+                _jumpKey = GamePad.GetState(_playerIndex).IsButtonDown(Buttons.A);
+                _grappleKey = GamePad.GetState(_playerIndex).IsButtonDown(Buttons.B);
             }
             else
             {
@@ -73,7 +105,7 @@ namespace ProjectHook
             //Controls
             
             //Left
-            if (controlX < 0)
+            if (controlX < 0 && CanControl)
             {
                 spriteEffects = SpriteEffects.FlipHorizontally;
                 Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
@@ -84,7 +116,7 @@ namespace ProjectHook
             }
 
             //Right
-            if (controlX > 0)
+            if (controlX > 0 && CanControl)
             {
                 spriteEffects = SpriteEffects.None;
                 Velocity.X = Math.Min(Velocity.X + Acceleration, controlX * MaxSpeed);
@@ -95,7 +127,7 @@ namespace ProjectHook
             }
 
             //Jump
-            if (_jumpKey && OnGround)
+            if (_jumpKey && OnGround && CanControl)
             {
 
                 Velocity.Y = JumpStrength;
@@ -108,10 +140,10 @@ namespace ProjectHook
             }
             
             //Hook
-            if (_grappleKey && grappleCooldown.IsOff())
+            if (_grappleKey && _grappleCooldown.IsOff() && CanControl)
             {
                 ThrowHook();
-                grappleCooldown.GoOnCooldown();
+                _grappleCooldown.GoOnCooldown();
             }
             #endregion
 
@@ -178,7 +210,7 @@ namespace ProjectHook
             #endregion
 
             //Set texture image
-            SourceRect = new Rectangle(0, (CurrentAnimation.Frames[_currentFrame]*64)+1, 64, 64);
+            SourceRect = new Rectangle(64 * _playerIndexInt, (CurrentAnimation.Frames[_currentFrame] * 64) + 1, 64, 64);
         }
 
         public void ChangeAnimation(Animation animation)
@@ -191,15 +223,24 @@ namespace ProjectHook
 
         public void ThrowHook()
         {
-            var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), new Vector2(GetDirection()*10, 0));
+            var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), this, 15);
             Game.GameObjects.Add(hook);
         }
 
-        public int GetDirection()
+        public void GetHit(Hook hook, Player player)
         {
-            if (spriteEffects == SpriteEffects.FlipHorizontally) return -1;
-            if (spriteEffects == SpriteEffects.None) return 1;
-            return 0;
+            var hookDirection = hook.GetDirection();
+
+            Velocity.Y = hook.Pull.Y;
+            Velocity.X = (hook.Pull.X * hookDirection ) * -1f;
+            player.Velocity.X = hook.Pull.X * hookDirection;
+            player.Velocity.Y = hook.Pull.Y;
+            player.OnGround = false;
+            OnGround = false;
+
+            CantControlFor = 20;
         }
+
+        
     }
 }
