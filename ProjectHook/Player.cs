@@ -162,7 +162,7 @@ namespace ProjectHook
                 CanJump = false;
             }
                 //If jump key isn't held, shorten the jump
-            else if(Velocity.Y < 0 && !_jumpKey)
+            else if(Velocity.Y < 0 && !_jumpKey && CanControl)
             {
                 Velocity.Y *=0.85f;
             }
@@ -198,8 +198,8 @@ namespace ProjectHook
                 Detector.Right = new Rectangle((int)(PositionX + detectorXOffset), (int)(PositionY - detectorYOffset), 1, (int)detectorHeight);
 
                 //Overlaps obstacles
-                if (OverlapsSolid(Detector.Right) && Velocity.X > 0 ||
-                    OverlapsSolid(Detector.Left) && Velocity.X < 0)
+                if (OverlapsTileLayer(Detector.Right, Globals.LAYER_SOLID) && Velocity.X > 0 ||
+                    OverlapsTileLayer(Detector.Left, Globals.LAYER_SOLID) && Velocity.X < 0)
                 {
                     Velocity.X = 0;
                     break;
@@ -226,18 +226,18 @@ namespace ProjectHook
                 Detector.Down = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY + 31), (int)detectorWidth - 4, 1);
 
                 //Is off the ground
-                if (!OverlapsSolid(Detector.Down))
+                if (!OverlapsTileLayer(Detector.Down, Globals.LAYER_SOLID))
                     CanJump = false;
 
                 //Hit the ceiling
-                if (OverlapsSolid(Detector.Up) && Velocity.Y < 0)
+                if (OverlapsTileLayer(Detector.Up, Globals.LAYER_SOLID) && Velocity.Y < 0)
                 {
                     Velocity.Y = 0;
                     break;
                 }
 
                 //Hit the ground
-                if (OverlapsSolid(Detector.Down) && Velocity.Y > 0)
+                if (OverlapsTileLayer(Detector.Down, Globals.LAYER_SOLID) && Velocity.Y > 0)
                 {
                     OnGround = true;
                     CanJump = true;
@@ -256,7 +256,7 @@ namespace ProjectHook
             }
             #endregion
 
-            if (IsOutOfFrame())
+            if (IsOutOfFrame(256) || PositionX + 16 < Camera.Position.X || OverlapsTileLayer(BoundingBox, Globals.LAYER_BAD))
                 Die();
 
             #region Animations
@@ -321,7 +321,7 @@ namespace ProjectHook
         {
             //Set velocity of player 
             Velocity.Y = hook.Pull.Y * 2;
-            Velocity.X = (hook.Pull.X * hook.GetDirection()) * 1.5f;
+            Velocity.X = (hook.Pull.X * hook.GetDirection()) * 1.3f;
 
             //Player can't control for a little bit
             CantControlFor = 15;
@@ -329,7 +329,8 @@ namespace ProjectHook
 
         public void Die()
         {
-            Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y);
+            Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y+100);
+            Velocity = Vector2.Zero;
         }
     }
 }

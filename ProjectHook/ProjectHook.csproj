@@ -39,7 +39,9 @@
     <Compile Include="Cloud.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="Cooldown.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="ProjectHookGame.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />
     <Compile Include="GameFrameWork\Camera.cs" />
     <Compile Include="GameFrameWork\GameHelper.cs" />
@@ -96,6 +98,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Content\MonoLog.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Levels\Level2.tmx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

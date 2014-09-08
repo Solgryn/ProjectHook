@@ -1,5 +1,8 @@
 ﻿#region Using Statements
 
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using GrappleRace.GameFrameWork;
 using LevelReader.GameFrameWork;
@@ -15,14 +18,17 @@ namespace ProjectHook
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : GameHost
+    public class ProjectHookGame : GameHost
     {
         public enum Level
         {
-            Level1
+            [Description("Level1")]
+            Level1,
+            [Description("Level2")]
+            Level2
         }
 
-        public Level CurrentLevel;
+        public Level CurrentLevel = Level.Level1;
 
         GraphicsDeviceManager _graphics;
         SpriteBatch _spriteBatch;
@@ -42,7 +48,7 @@ namespace ProjectHook
 
         private bool _canPressKey = true; //Make sure key press doesn't loop
         
-        public Game1()
+        public ProjectHookGame()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -74,12 +80,10 @@ namespace ProjectHook
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             var fishTx = Content.Load<Texture2D>("fish");
-            _player1 = new Player(this, new Vector2(100, 100), fishTx, PlayerIndex.One);
-            _player2 = new Player(this, new Vector2(200, 100), fishTx, PlayerIndex.Two);
-            var cloudTx = Content.Load<Texture2D>("cloud");
-            _cloud = new Cloud(this, new Vector2(0,150), cloudTx);
 
-            GameObjects.Add(_cloud);
+            _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
+            _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
+
             GameObjects.Add(_player1);
             GameObjects.Add(_player2);
 
@@ -88,10 +92,9 @@ namespace ProjectHook
 
             //Tiles
             _tiles = Content.Load<Texture2D>("tiles");
-            _font = Content.Load<SpriteFont>("MonoLog");
-            _level = new TiledMap("Levels/Level1.tmx");
+            _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
 
-            _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level, _font);
+            _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
             GameObjects.Add(_mapObject);
         }
 
@@ -113,9 +116,11 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            //Camera
-            Camera.Position.X = Collections.Players.Average(player => player.PositionX) - 250; //Set x position to average of all players
-            Camera.Position.Y = 100;
+            //Set camera position
+            Camera.Position.X = Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f); //Set x position to average of all players
+            Camera.Position.Y = 175;
+
+            Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
 
             //Toggle drawing of hitboxes
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && _canPressKey)
@@ -126,6 +131,14 @@ namespace ProjectHook
 
             if (Keyboard.GetState().IsKeyUp(Keys.F1))
                 _canPressKey = true;
+
+
+            //Change levels
+            if(Keyboard.GetState().IsKeyDown(Keys.F2))
+                GoToLevel(Level.Level1);
+
+            if (Keyboard.GetState().IsKeyDown(Keys.F3))
+                GoToLevel(Level.Level2);
                 
             //Quit game
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -144,7 +157,7 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.LightSkyBlue);
+            GraphicsDevice.Clear(Color.SkyBlue);
 
             _spriteBatch.Begin();
             foreach (SpriteObject gameObject in GameObjects)
@@ -172,18 +185,19 @@ namespace ProjectHook
 
         private Texture2D generateTexture2D(int width, int height, Color textureColor)
         {
-            Texture2D rectangleTexture = new Texture2D(this.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+            Texture2D rectangleTexture = new Texture2D(GraphicsDevice, width, height, false, SurfaceFormat.Color);
             Color[] color = new Color[width * height];
             for (int i = 0; i < color.Length; i++)
             {
                 color[i] = textureColor;
             }
-            rectangleTexture.SetData(color);//set the color data on the texture
-            return rectangleTexture;//return the texture
+            rectangleTexture.SetData(color); //set the color data on the texture
+            return rectangleTexture; //return the texture
         }
 
         public void GoToLevel(Level level)
         {
+            Camera.Position = Vector2.Zero;
             UnloadContent();
             CurrentLevel = level;
             LoadContent();

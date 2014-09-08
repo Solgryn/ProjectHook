@@ -231,12 +231,12 @@ namespace GrappleRace.GameFrameWork
             return BoundingBox.Intersects(other.BoundingBox);
         }
 
-        //Check if the object is overlapping a solid tile
-        public bool OverlapsSolid(Rectangle hitbox)
+        //Check if the object is overlapping a tile from a layer with a specific layer name
+        public bool OverlapsTileLayer(Rectangle hitbox, string layerName)
         {
             foreach (var tile in Collections.Tiles)
             {
-                if (hitbox.Intersects(tile.BoundingBox) && tile.LayerName == "Solid")
+                if (hitbox.Intersects(tile.BoundingBox) && tile.LayerName == layerName)
                     return true;
             }
             return false;
@@ -257,12 +257,12 @@ namespace GrappleRace.GameFrameWork
         }
 
         //Check if object is out of the visible screen
-        public bool IsOutOfFrame()
+        public bool IsOutOfFrame(float offset = 0)
         {
-            return (PositionX < Camera.Position.X ||
-                    PositionX > Camera.Position.X + Camera.Width ||
-                    PositionY < Camera.Position.Y ||
-                    PositionY > Camera.Position.Y + Camera.Height);
+            return (PositionX + offset < Camera.Position.X ||
+                    PositionX - offset > Camera.Position.X + Camera.Width ||
+                    PositionY + offset < Camera.Position.Y ||
+                    PositionY - offset > Camera.Position.Y + Camera.Height);
         }
     }
 }
