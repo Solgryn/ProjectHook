@@ -41,6 +41,7 @@
     <Compile Include="Cooldown.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />
+    <Compile Include="GameFrameWork\Camera.cs" />
     <Compile Include="GameFrameWork\GameHelper.cs" />
     <Compile Include="GameFrameWork\GameHost.cs" />
     <Compile Include="GameFrameWork\GameObjectBase.cs" />

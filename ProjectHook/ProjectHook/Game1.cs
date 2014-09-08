@@ -1,9 +1,14 @@
 ﻿#region Using Statements
+
+using System;
+using System.Diagnostics;
 using GrappleRace.GameFrameWork;
 using LevelReader.GameFrameWork;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectHook.GameFrameWork;
+
 #endregion
 
 namespace ProjectHook
@@ -31,6 +36,10 @@ namespace ProjectHook
         private string _levelInfo;
         private SpriteFont _font;
         private MapObject _mapObject;
+
+        private bool _drawHitboxes;
+
+        private bool _canPressKey = true; //Make sure key press doesn't loop
         
         public Game1()
             : base()
@@ -68,10 +77,10 @@ namespace ProjectHook
 
             GameObjects.Add(_cloud);
             GameObjects.Add(_player1);
-            //GameObjects.Add(_player2);
+            GameObjects.Add(_player2);
 
             Collections.Players.Add(_player1);
-            //Collections.Players.Add(_player2);
+            Collections.Players.Add(_player2);
 
             //Tiles
             _tiles = Content.Load<Texture2D>("tiles");
@@ -101,6 +110,23 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            //Camera
+            Camera.Position.X = ((_player1.PositionX + _player2.PositionX) / 2) - 250;
+            Camera.Position.Y = 100;
+
+
+
+            //Toggle drawing of hitboxes
+            if (Keyboard.GetState().IsKeyDown(Keys.F1) && _canPressKey)
+            {
+                _drawHitboxes = !_drawHitboxes;
+                _canPressKey = false;
+            }
+
+            if (Keyboard.GetState().IsKeyUp(Keys.F1))
+                _canPressKey = true;
+                
+            //Quit game
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -130,9 +156,12 @@ namespace ProjectHook
             }
 
             //Draw hitboxes
-            foreach (SpriteObject gameObject in GameObjects)
+            if (_drawHitboxes)
             {
-                _spriteBatch.Draw(generateTexture2D(gameObject.BoundingBox.Width, gameObject.BoundingBox.Height, Color.Red), new Vector2(gameObject.BoundingBox.Location.X, gameObject.BoundingBox.Location.Y));
+                foreach (SpriteObject gameObject in GameObjects)
+                {
+                    _spriteBatch.Draw(generateTexture2D(gameObject.BoundingBox.Width, gameObject.BoundingBox.Height, Color.Red), new Vector2(gameObject.BoundingBox.Location.X + (-Camera.Position.X), gameObject.BoundingBox.Location.Y + Camera.Position.Y) * Camera.Scale);
+                }
             }
 
             _spriteBatch.End();

@@ -10,7 +10,7 @@ namespace ProjectHook
 {
     public class Hook : SpriteObject
     {
-        public Vector2 Pull = new Vector2(10, -5);
+        public Vector2 Pull = new Vector2(10, -7.5f);
         private readonly Player _player;
         private float _life;
         private readonly float _maxLife;
@@ -57,7 +57,6 @@ namespace ProjectHook
                         Destroy();
                     }
                 }
-
             }
 
             //Hook hits ground

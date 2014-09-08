@@ -121,7 +121,7 @@ namespace ProjectHook
             }
 
             //Walk Left
-            if (controlX < 0 && CanControl)
+            if (controlX < 0 && CanControl && Velocity.X > -MaxSpeed)
             {
                 spriteEffects = SpriteEffects.FlipHorizontally;
                 Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
@@ -133,7 +133,7 @@ namespace ProjectHook
             }
 
             //Walk Right
-            if (controlX > 0 && CanControl)
+            if (controlX > 0 && CanControl && Velocity.X < MaxSpeed)
             {
                 spriteEffects = SpriteEffects.None;
                 Velocity.X = Math.Min(Velocity.X + Acceleration, controlX * MaxSpeed);
@@ -165,6 +165,12 @@ namespace ProjectHook
             #endregion
 
             #region Moving the player
+
+            var detectorXOffset = Detector.XOffset*ScaleX;
+            var detectorYOffset = Detector.YOffset*ScaleY;
+            var detectorWidth = Detector.Width*ScaleX;
+            var detectorHeight = Detector.Height*ScaleY;
+
             //Apply Gravity
             if(!OnGround)
                 Velocity.Y += 0.35f;
@@ -177,8 +183,8 @@ namespace ProjectHook
             for (var i = 0; i < Math.Abs(Velocity.X); i++)
             {
                 //Update hit detecors
-                Detector.Left = new Rectangle((int)(PositionX - Detector.XOffset), (int)(PositionY - Detector.YOffset), 1, Detector.Height);
-                Detector.Right = new Rectangle((int)(PositionX + Detector.XOffset), (int)(PositionY - Detector.YOffset), 1, Detector.Height);
+                Detector.Left = new Rectangle((int)(PositionX - detectorXOffset), (int)(PositionY - detectorYOffset), 1, (int)detectorHeight);
+                Detector.Right = new Rectangle((int)(PositionX + detectorXOffset), (int)(PositionY - detectorYOffset), 1, (int)detectorHeight);
 
                 //Overlaps obstacles
                 if (OverlapsSolid(Detector.Right) && Velocity.X > 0 ||
@@ -205,8 +211,8 @@ namespace ProjectHook
             for (var i = 0; i < Math.Abs(Velocity.Y); i++)
             {
                 //Update hit detectors
-                Detector.Up = new Rectangle((int)(PositionX - Detector.XOffset + 2), (int)(PositionY - 16f), Detector.Width - 4, 1);
-                Detector.Down = new Rectangle((int)(PositionX - Detector.XOffset + 2), (int)(PositionY + 31), Detector.Width - 4, 1);
+                Detector.Up = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY - 16f), (int)detectorWidth - 4, 1);
+                Detector.Down = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY + 31), (int)detectorWidth - 4, 1);
 
                 //Is off the ground
                 if (!OverlapsSolid(Detector.Down))
@@ -304,7 +310,7 @@ namespace ProjectHook
             Velocity.X = (hook.Pull.X * hook.GetDirection()) * 1.5f;
 
             //Player can't control for a little bit
-            CantControlFor = 10;
+            CantControlFor = 15;
         }
 
         public bool OverlapsSolid(Rectangle hitbox)

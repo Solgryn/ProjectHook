@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ProjectHook.GameFrameWork;
 
 namespace GrappleRace.GameFrameWork
 {
@@ -207,18 +208,19 @@ namespace GrappleRace.GameFrameWork
             if (SpriteTexture != null)
             {
                 //Round off position to reduce blurryness (CUSTOM)
-                var roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y));
+                var roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y))
+                    + new Vector2((float)Math.Round(-Camera.Position.X), (float)Math.Round(-Camera.Position.Y));
 
                 // Has a source rectangle been set?
                 if (SourceRect.IsEmpty)
                 {
                     // No, so draw the entire sprite texture
-                    spriteBatch.Draw(SpriteTexture, roundedPosition, null, SpriteColor, Angle, Origin, Scale, spriteEffects, LayerDepth);
+                    spriteBatch.Draw(SpriteTexture, roundedPosition * Camera.Scale, null, SpriteColor, Angle, Origin, Scale * Camera.Scale, spriteEffects, LayerDepth);
                 }
                 else
                 {
                     // Yes, so just draw the specified SourceRect
-                    spriteBatch.Draw(SpriteTexture, roundedPosition, SourceRect, SpriteColor, Angle, Origin, Scale, spriteEffects, LayerDepth);
+                    spriteBatch.Draw(SpriteTexture, roundedPosition * Camera.Scale, SourceRect, SpriteColor, Angle, Origin, Scale * Camera.Scale, spriteEffects, LayerDepth);
                 }
             }
         }
