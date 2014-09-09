@@ -35,13 +35,9 @@ namespace ProjectHook
 
         private Player _player1;
         private Player _player2;
-        private Cloud _cloud;
 
         private Texture2D _tiles;
         private TiledMap _level;
-        private bool _levelLoaded = false;
-        private string _levelInfo;
-        private SpriteFont _font;
         private MapObject _mapObject;
 
         private bool _drawHitboxes;
@@ -119,6 +115,8 @@ namespace ProjectHook
             //Set camera position
             Camera.Position.X = Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f); //Set x position to average of all players
             Camera.Position.Y = 175;
+
+            Camera.Zoom = Camera.Zoom.SmoothTowards(200, 0.01f);
 
             Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
 
