@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using GrappleRace.GameFrameWork;
 using LevelReader.GameFrameWork;
 using Microsoft.Xna.Framework;
@@ -38,6 +39,8 @@ namespace ProjectHook
 
         private Player _player1;
         private Player _player2;
+        private Menu _menu;
+        private SpriteFont _font;
 
         private Texture2D _tiles;
         private TiledMap _level;
@@ -54,6 +57,7 @@ namespace ProjectHook
             Content.RootDirectory = "Content";
 
             //Change screen size
+            
             _graphics.PreferredBackBufferWidth = Camera.Width;
             _graphics.PreferredBackBufferHeight = Camera.Height;
         }
@@ -80,37 +84,39 @@ namespace ProjectHook
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             var fishTx = Content.Load<Texture2D>("fish");
-
+            _font = Content.Load<SpriteFont>("MonoLog");
             _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
             _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
-
+            _menu = new Menu(this, _font, new Vector2(0, 0));
+            
             GameObjects.Add(_player1);
             GameObjects.Add(_player2);
-
+            
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
-            
+            GameObjects.Add(_menu);
             
 
             //Tiles
             if (CurrentLevel.ToDescription() == "Intro")
             {
-                _tiles = Content.Load<Texture2D>("tile");
-                _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
-                _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
-                GameObjects.Add(_mapObject);
+                _menu.ShowMenu();
+
 
             }
             else
             {
-                GameObjects.Remove(_mapObject);
                 _tiles = Content.Load<Texture2D>("tiles");
-
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
-
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
+                
+                
                 GameObjects.Add(_mapObject);
+                
+                
+
             }
+            
 
         }
 
@@ -123,6 +129,7 @@ namespace ProjectHook
             GameObjects.Clear();
             Collections.Players.Clear();
             Collections.Tiles.Clear();
+
         }
 
         /// <summary>
@@ -132,8 +139,7 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (CurrentLevel != Level.Intro)
-            {
+
                 //Set camera position
                 Camera.Position.X =
                     Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f);
@@ -143,7 +149,7 @@ namespace ProjectHook
                 //Camera.Zoom = Camera.Zoom.SmoothTowards(200, 0.01f);
 
                 Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
-            }
+           
             //Toggle drawing of hitboxes
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && _canPressKey)
             {
@@ -158,6 +164,8 @@ namespace ProjectHook
             //Change levels
             if (Keyboard.GetState().IsKeyDown(Keys.F5))
                 GoToLevel(Level.Intro);
+
+
 
             if(Keyboard.GetState().IsKeyDown(Keys.F2))
                 GoToLevel(Level.Level1);
@@ -182,17 +190,21 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.SkyBlue);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+            
+            
 
             _spriteBatch.Begin();
-            foreach (SpriteObject gameObject in GameObjects)
-            {
-                gameObject.Draw(gameTime, _spriteBatch);
-            }
+
             foreach (var tile in Collections.Tiles)
             {
                 tile.Draw(gameTime, _spriteBatch);
             }
+            foreach (SpriteObject gameObject in GameObjects)
+            {
+                gameObject.Draw(gameTime, _spriteBatch);
+            }
+            
 
             //Draw hitboxes
             if (_drawHitboxes)
@@ -223,8 +235,8 @@ namespace ProjectHook
         public void GoToLevel(Level level)
         {
             Camera.Position = Vector2.Zero;
-            UnloadContent();
             CurrentLevel = level;
+            UnloadContent();
             LoadContent();
         }
     }

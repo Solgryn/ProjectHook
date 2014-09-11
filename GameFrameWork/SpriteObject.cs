@@ -143,6 +143,7 @@ namespace GrappleRace.GameFrameWork
         //Change sprite effects
         public SpriteEffects spriteEffects { get; set; }
 
+
         /// <summary>
         /// Calculate a simple bounding box for the sprite
         /// </summary>

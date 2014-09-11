@@ -132,6 +132,7 @@ namespace ProjectHook
             //Walk Left
             if (controlX < 0 && CanControl && Velocity.X > -MaxSpeed)
             {
+                
                 spriteEffects = SpriteEffects.FlipHorizontally;
                 Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
             }
