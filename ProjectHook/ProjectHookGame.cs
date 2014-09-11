@@ -116,7 +116,7 @@ namespace ProjectHook
             Camera.Position.X = Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f); //Set x position to average of all players
             Camera.Position.Y = 175;
 
-            Camera.Zoom = Camera.Zoom.SmoothTowards(200, 0.01f);
+            //Camera.Zoom = Camera.Zoom.SmoothTowards(200, 0.01f);
 
             Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
 

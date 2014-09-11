@@ -209,7 +209,8 @@ namespace GrappleRace.GameFrameWork
             {
                 //Round off position to reduce blurryness (CUSTOM)
                 var roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y))
-                    + new Vector2((float)Math.Round(-Camera.Position.X), (float)Math.Round(-Camera.Position.Y)) + new Vector2(Camera.Width/2f, Camera.Height/2f);
+                    + new Vector2((float)Math.Round(-Camera.Position.X), (float)Math.Round(-Camera.Position.Y)) ;
+                //+ new Vector2(Camera.Width/2f, Camera.Height/2f)
 
                 // Has a source rectangle been set?
                 if (SourceRect.IsEmpty)
