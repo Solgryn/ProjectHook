@@ -41,7 +41,9 @@
     <Compile Include="Cooldown.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Globals.cs" />
-    <Compile Include="Menu.cs" />
+    <Compile Include="Menu\GameMenu.cs" />
+    <Compile Include="Menu\IMenu.cs" />
+    <Compile Include="Menu\IntroMenu.cs" />
     <Compile Include="ProjectHookGame.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />
     <Compile Include="GameFrameWork\Camera.cs" />
@@ -99,7 +101,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
-    <Content Include="menubg.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Content\handwriting64.xnb">
