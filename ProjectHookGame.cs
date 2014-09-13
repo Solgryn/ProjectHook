@@ -144,6 +144,10 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyUp(Keys.F1))
                 _canPressKey = true;
 
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+            {       
+                 openSelectedItem();
+            }
 
             //Change levels
             if (Keyboard.GetState().IsKeyDown(Keys.F5))
@@ -222,9 +226,30 @@ namespace ProjectHook
         public void GoToLevel(Level level)
         {
             Camera.Position = Vector2.Zero;
-            CurrentLevel = level;
             UnloadContent();
+            CurrentLevel = level;
             LoadContent();
+        }
+
+        public void openSelectedItem()
+        {
+            switch (_introMenu._MenuState)
+            {
+
+                case IntroMenu.MenuState.Single:
+                    GoToLevel(Level.Level1);
+                    break;
+                case IntroMenu.MenuState.Multi:
+                    GoToLevel(Level.Level2);
+                    break;
+                case IntroMenu.MenuState.Options:
+                    break;
+                case IntroMenu.MenuState.Exit:
+                    Exit();
+                    break;
+
+
+            }
         }
     }
 }
