@@ -187,7 +187,8 @@ namespace ProjectHook
             {            
                 CurrentLevel = Level.Menu;
                 if (CurrentLevel == Level.Menu)
-                {         
+                {       
+                
                 _gameMenu.ShowMenu();
                 }
             }
@@ -303,6 +304,7 @@ namespace ProjectHook
             switch (_gameMenu._MenuState)
             {
                 case GameMenu.MenuState.Resume:
+                    CurrentLevel = Level.Level1;
                     _gameMenu.CloseMenu();
                     break;
                 case GameMenu.MenuState.Options:

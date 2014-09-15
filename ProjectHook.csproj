@@ -44,6 +44,7 @@
     <Compile Include="Menu\GameMenu.cs" />
     <Compile Include="Menu\IMenu.cs" />
     <Compile Include="Menu\IntroMenu.cs" />
+    <Compile Include="Menu\OptionsMenu.cs" />
     <Compile Include="ProjectHookGame.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />
     <Compile Include="GameFrameWork\Camera.cs" />
