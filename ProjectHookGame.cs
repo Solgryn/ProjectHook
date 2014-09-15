@@ -87,7 +87,10 @@ namespace ProjectHook
 
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
-            GameObjects.Add(_introMenu);
+            
+            //køres specifikt i update hvis level=intro
+            //GameObjects.Add(_introMenu);
+            
             GameObjects.Add(_gameMenu);
 
             //Tiles
@@ -148,27 +151,33 @@ namespace ProjectHook
                 _canPressKey = true;
 
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
-            {       
-                 openSelectedItem();
+            {
+                openSelectedItem();
             }
+            if (CurrentLevel == Level.Intro)
+                _introMenu.Update(gameTime);
 
-            //Change levels
-            if (Keyboard.GetState().IsKeyDown(Keys.F5))
-                GoToLevel(Level.Intro);
+                //Change levels
+                if (Keyboard.GetState().IsKeyDown(Keys.F5))
+                    GoToLevel(Level.Intro);
 
+                if (Keyboard.GetState().IsKeyDown(Keys.F4))
+                    _gameMenu.ShowMenu();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.F2))
-                GoToLevel(Level.Level1);
+                if (Keyboard.GetState().IsKeyDown(Keys.F2))
+                    GoToLevel(Level.Level1);
 
-            if (Keyboard.GetState().IsKeyDown(Keys.F3))
-                GoToLevel(Level.Level2);
+                if (Keyboard.GetState().IsKeyDown(Keys.F3))
+                    GoToLevel(Level.Level2);
 
-            //Quit game
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+                //Quit game
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                    Keyboard.GetState().IsKeyDown(Keys.Escape))
+                    Exit();
+            
+        
 
-            for (int index = 0; index < GameObjects.Count; index++)
+    for (int index = 0; index < GameObjects.Count; index++)
             {
                 GameObjects[index].Update(gameTime);
             }
@@ -210,7 +219,7 @@ namespace ProjectHook
             }
 
             _spriteBatch.End();
-
+            if(CurrentLevel==Level.Intro) _introMenu.Draw(gameTime, _spriteBatch);
             base.Draw(gameTime);
         }
 

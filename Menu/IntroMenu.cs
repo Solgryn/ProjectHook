@@ -20,7 +20,6 @@ namespace ProjectHook
         private List<TextObject> items = new List<TextObject>();
         private SpriteObject _menu;
         private TextObject _menuitem;
-        private bool canPressKey;
         public bool isMenuOpen { get; set; }
         private int selectedItem = 0;
         private bool _canPressKeyMenuDown = true;
@@ -41,7 +40,7 @@ namespace ProjectHook
         MenuState _menuState = new MenuState();
         public MenuState _MenuState { get { return _menuState; } set { _menuState = value; } }
 
-        private bool _canpressKeyMenuEnter = true;
+       
 
         public IntroMenu(GameHost game, SpriteFont font, Vector2 position) : base(game, font, position)
         {
@@ -72,7 +71,7 @@ namespace ProjectHook
         public override void Update(GameTime gameTime)
         {
             
-
+            
             if (Keyboard.GetState().IsKeyDown(Keys.Down) && _canPressKeyMenuDown && selectedItem != items.Count - 1)
             {
                 _canPressKeyMenuDown = false;

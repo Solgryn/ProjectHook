@@ -17,7 +17,8 @@ namespace ProjectHook.Menu
         private readonly List<String> menuItems = new List<string>() {"Resume Game", "Options", "Exit Game"};
         private SpriteObject _menu;
         private TextObject _menuitem;
-        private bool canPressKey;
+        private List<TextObject> items = new List<TextObject>();
+        private int selectedItem = 0;
         public bool isMenuOpen { get; set; }
 
         public GameMenu(GameHost game, SpriteFont font, Vector2 position) : base(game, font, position)
@@ -46,31 +47,16 @@ namespace ProjectHook.Menu
                 float x = 768 / 2 - _menuitem.BoundingBox.Width / 2;
                 float y = 432 / 2 - _menuitem.BoundingBox.Height + i * 30;
                 _menuitem.Position = new Vector2(x, y);
+                items.Add(_menuitem);
                 _game.GameObjects.Add(_menuitem);
             }
+            items[selectedItem].SpriteColor = Color.Green;
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.F4) && !isMenuOpen && canPressKey)
-            {
-                isMenuOpen = true;
-                canPressKey = false;
-
-                ShowMenu();
-                _menu.Position = Camera.Position;
-            }
-
-
-            if (Keyboard.GetState().IsKeyDown(Keys.F4) && isMenuOpen && canPressKey)
-            {
-                canPressKey = false;
-                isMenuOpen = false;
-                CloseMenu();
-                _menu.Position = Camera.Position;
-            }
-            if (Keyboard.GetState().IsKeyUp(Keys.F4))
-                canPressKey = true;
+            
+            
         }
 
     }
