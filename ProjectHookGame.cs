@@ -24,7 +24,10 @@ namespace ProjectHook
         {
             [Description("Intro")] Intro,
             [Description("Level1")] Level1,
-            [Description("Level2")] Level2
+            [Description("Level2")] Level2,
+            [Description("GameMenu")]
+            Menu
+
         }
 
         public Level CurrentLevel = Level.Intro;
@@ -88,10 +91,10 @@ namespace ProjectHook
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
             
-            //køres specifikt i update hvis level=intro
+            //køres specifikt i update hvis level=intro eller level=gameMenu
             //GameObjects.Add(_introMenu);
             
-            GameObjects.Add(_gameMenu);
+            //GameObjects.Add(_gameMenu);
 
             //Tiles
             if (CurrentLevel.ToDescription() == "Intro")
@@ -152,19 +155,32 @@ namespace ProjectHook
 
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
-                openSelectedItem();
+                if(CurrentLevel == Level.Intro)
+                OpenSelectedItemIntro();
+                if (CurrentLevel == Level.Menu && _gameMenu.isMenuOpen)
+                {
+                    OpenSelectedItemGameMenu();
+                }
             }
             if (CurrentLevel == Level.Intro)
                 _introMenu.Update(gameTime);
+            if (CurrentLevel == Level.Menu)
+                _gameMenu.Update(gameTime);
 
                 //Change levels
                 if (Keyboard.GetState().IsKeyDown(Keys.F5))
                     GoToLevel(Level.Intro);
 
-                if (Keyboard.GetState().IsKeyDown(Keys.F4))
-                    _gameMenu.ShowMenu();
+            if (Keyboard.GetState().IsKeyDown(Keys.F4) && !_gameMenu.isMenuOpen && CurrentLevel != Level.Intro)
+            {            
+                CurrentLevel = Level.Menu;
+                if (CurrentLevel == Level.Menu)
+                {         
+                _gameMenu.ShowMenu();
+                }
+            }
 
-                if (Keyboard.GetState().IsKeyDown(Keys.F2))
+            if (Keyboard.GetState().IsKeyDown(Keys.F2))
                     GoToLevel(Level.Level1);
 
                 if (Keyboard.GetState().IsKeyDown(Keys.F3))
@@ -176,14 +192,18 @@ namespace ProjectHook
                     Exit();
             
         
-
-    for (int index = 0; index < GameObjects.Count; index++)
+            if(!_gameMenu.isMenuOpen)
+            { 
+                 for (int index = 0; index < GameObjects.Count; index++)
             {
                 GameObjects[index].Update(gameTime);
+            }
             }
 
             base.Update(gameTime);
         }
+
+
 
         /// <summary>
         ///     This is called when the game should draw itself.
@@ -220,6 +240,7 @@ namespace ProjectHook
 
             _spriteBatch.End();
             if(CurrentLevel==Level.Intro) _introMenu.Draw(gameTime, _spriteBatch);
+            if (CurrentLevel == Level.Menu) _gameMenu.Draw(gameTime, _spriteBatch);
             base.Draw(gameTime);
         }
 
@@ -243,7 +264,7 @@ namespace ProjectHook
             LoadContent();
         }
 
-        public void openSelectedItem()
+        public void OpenSelectedItemIntro()
         {
             switch (_introMenu._MenuState)
             {
@@ -263,6 +284,23 @@ namespace ProjectHook
 
 
             }
+
+        }
+        private void OpenSelectedItemGameMenu()
+        {
+            switch (_gameMenu._MenuState)
+            {
+                case GameMenu.MenuState.Resume:
+                    _gameMenu.CloseMenu();
+                    break;
+                case GameMenu.MenuState.Options:
+                    break;
+                case GameMenu.MenuState.Exit:
+                    _gameMenu.CloseMenu();
+                    _introMenu.ShowMenu();
+                    break;
+            }
+            
         }
     }
 }
