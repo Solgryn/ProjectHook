@@ -83,8 +83,7 @@ namespace ProjectHook
             _introMenu = new IntroMenu(this, _font, new Vector2(0, 0));
             _gameMenu = new GameMenu(this, _font, new Vector2(0, 0));
 
-            GameObjects.Add(_player1);
-            GameObjects.Add(_player2);
+            
 
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
@@ -98,6 +97,10 @@ namespace ProjectHook
             }
             else
             {
+
+                GameObjects.Add(_player1);
+                //if (_introMenu._MenuState == IntroMenu.MenuState.Multi)
+                
                 _tiles = Content.Load<Texture2D>("tiles");
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
@@ -241,6 +244,7 @@ namespace ProjectHook
                     break;
                 case IntroMenu.MenuState.Multi:
                     GoToLevel(Level.Level2);
+                    GameObjects.Add(_player2);
                     break;
                 case IntroMenu.MenuState.Options:
                     break;

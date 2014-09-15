@@ -77,7 +77,7 @@ namespace ProjectHook
             {
                 _canPressKeyMenuDown = false;
                 selectedItem++;
-                items[selectedItem - 1].SpriteColor = Color.White;
+                items[selectedItem - 1].SpriteColor = Color.White; // Throws an expection!!
                 items[selectedItem].SpriteColor = Color.Green;
                 _menuState++;
 
