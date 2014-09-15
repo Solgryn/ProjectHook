@@ -51,6 +51,7 @@ namespace ProjectHook
 
         public void ShowMenu()
         {
+            isMenuOpen = true;
             var menubg = Game.Content.Load<Texture2D>("menubg");
             _menu = new SpriteObject(_game, new Vector2(0, 0), menubg);
             _menu.SpriteColor = new Color(0, 0, 0, 150);

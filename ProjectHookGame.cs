@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using GrappleRace.GameFrameWork;
 using LevelReader.GameFrameWork;
 using Microsoft.Xna.Framework;
@@ -45,6 +46,7 @@ namespace ProjectHook
         private Player _player2;
         private SpriteBatch _spriteBatch;
         private Texture2D _tiles;
+        private bool _canPressEnter;
 
 
         public ProjectHookGame()
@@ -103,10 +105,8 @@ namespace ProjectHook
             }
             else
             {
-
                 GameObjects.Add(_player1);
-                //if (_introMenu._MenuState == IntroMenu.MenuState.Multi)
-                
+                //if (_introMenu._MenuState == IntroMenu.MenuState.Multi)   
                 _tiles = Content.Load<Texture2D>("tiles");
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
@@ -153,8 +153,9 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyUp(Keys.F1))
                 _canPressKey = true;
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter)
             {
+                _canPressEnter = false;
                 if(CurrentLevel == Level.Intro)
                 OpenSelectedItemIntro();
                 if (CurrentLevel == Level.Menu && _gameMenu.isMenuOpen)
@@ -162,8 +163,19 @@ namespace ProjectHook
                     OpenSelectedItemGameMenu();
                 }
             }
+            if (Keyboard.GetState().IsKeyUp(Keys.Enter) && !_canPressEnter)
+            {
+                _canPressEnter = true;
+            }
             if (CurrentLevel == Level.Intro)
-                _introMenu.Update(gameTime);
+            {_introMenu.Update(gameTime);
+                if (!_introMenu.isMenuOpen)
+                {
+                    
+                }
+
+
+            }
             if (CurrentLevel == Level.Menu)
                 _gameMenu.Update(gameTime);
 
@@ -296,8 +308,8 @@ namespace ProjectHook
                 case GameMenu.MenuState.Options:
                     break;
                 case GameMenu.MenuState.Exit:
-                    _gameMenu.CloseMenu();
-                    _introMenu.ShowMenu();
+                    _gameMenu.CloseMenu();                 
+                    GoToLevel(Level.Intro);
                     break;
             }
             
