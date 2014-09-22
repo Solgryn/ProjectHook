@@ -101,7 +101,8 @@ namespace ProjectHook
 
             #region Controls
             //Get X control
-            float controlX = Globals.GetControl(_playerIndex).X;
+            var controlX = Globals.GetControl(_playerIndex).X;
+
             //Get buttons
             if (GamePad.GetState(_playerIndex).IsConnected)
             {

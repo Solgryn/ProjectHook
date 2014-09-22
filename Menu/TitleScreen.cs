@@ -47,9 +47,13 @@ namespace ProjectHook
         {
             IsMenuOpen = true;
             var menubg = Game.Content.Load<Texture2D>("menubg");
+            var title = Game.Content.Load<Texture2D>("title");
+
             _menu = new SpriteObject(_game, new Vector2(0, 0), menubg);
+            var _title = new SpriteObject(_game, new Vector2(32, 175), title); //ATM, I don't know why these magic numbers work to center the image (35, 175)
             _menu.SpriteColor = new Color(0, 0, 0, 150);
             Game.GameObjects.Add(_menu);
+            Game.GameObjects.Add(_title);
             for (int i = 0; i < _menuItems.Count; i++)
             {
                 _menuitem = new TextObject(_game, _font, new Vector2(0, 0), _menuItems[i]);

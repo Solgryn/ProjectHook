@@ -59,7 +59,5 @@ namespace ProjectHook
             control = Vector2.Clamp(control, new Vector2(-1, -1), new Vector2(1, 1));
             return control;
         }
-
-
     }
 }

@@ -101,8 +101,7 @@ namespace ProjectHook
             else
             {
                 GameObjects.Add(_player1);
-                GameObjects.Add(_player2);
-                //if (_titleScreen._MenuState == TitleScreen.MenuState.Multi)   
+                GameObjects.Add(_player2); 
                 _tiles = Content.Load<Texture2D>("tiles");
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
@@ -135,8 +134,6 @@ namespace ProjectHook
             //Set x position to average of all players
             Camera.Position.Y = 175;
 
-            //Camera.Zoom = Camera.Zoom.SmoothTowards(200, 0.01f);
-
             Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
 
             //Toggle drawing of hitboxes
@@ -149,22 +146,21 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyUp(Keys.F1))
                 _canPressKey = true;
 
+
+            //Menu controls
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter)
             {
                 _canPressEnter = false;
                 CurrentMenu.OpenSelection();
             }
 
-            if (Keyboard.GetState().IsKeyUp(Keys.Enter) && !_canPressEnter)
-            {
-                _canPressEnter = true;
-            }
+                //Make the enter key not repeat
+                if (Keyboard.GetState().IsKeyUp(Keys.Enter) && !_canPressEnter)
+                    _canPressEnter = true;
 
             //Update menu if there is one open
             if (CurrentMenu != null)
-            {
                 CurrentMenu.Update(gameTime);
-            }
 
             //Change levels
             if (Keyboard.GetState().IsKeyDown(Keys.F5))
@@ -181,7 +177,6 @@ namespace ProjectHook
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            
         
             if(!_pauseMenu.IsMenuOpen)
             { 
@@ -193,9 +188,7 @@ namespace ProjectHook
 
             base.Update(gameTime);
         }
-
-
-
+        
         /// <summary>
         ///     This is called when the game should draw itself.
         /// </summary>
@@ -203,7 +196,6 @@ namespace ProjectHook
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
 
             _spriteBatch.Begin();
 
@@ -258,6 +250,7 @@ namespace ProjectHook
         public void GoToMenu(IMenu menu)
         {
             CurrentMenu = menu;
+            UnloadContent();
             LoadContent();
         }
     }
