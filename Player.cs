@@ -100,39 +100,24 @@ namespace ProjectHook
             #endregion
 
             #region Controls
-            //Use either gamepad or keyboard for input
-            float controlX;
+            //Get X control
+            float controlX = Globals.GetControl(_playerIndex).X;
+            //Get buttons
             if (GamePad.GetState(_playerIndex).IsConnected)
             {
                 var gamepadState = GamePad.GetState(_playerIndex);
-
-                controlX = gamepadState.ThumbSticks.Left.X; //Control via stick
-
-                if (gamepadState.DPad.Right == ButtonState.Pressed) //Control via DPad
-                    controlX++;
-                if (gamepadState.DPad.Left == ButtonState.Pressed)
-                    controlX--;
-
                 _jumpKey = gamepadState.IsButtonDown(Buttons.A);
                 _grappleKey = gamepadState.IsButtonDown(Buttons.B);
             }
             else
             {
-                controlX = 0;
-                if (Keyboard.GetState().IsKeyDown(Keys.Left))
-                    controlX = -1;
-                if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                    controlX = 1;
                 _jumpKey = Keyboard.GetState().IsKeyDown(Keys.Z);
                 _grappleKey = Keyboard.GetState().IsKeyDown(Keys.X);
             }
 
-            MathHelper.Clamp(controlX, -1, 1);
-
             //Walk Left
             if (controlX < 0 && CanControl && Velocity.X > -MaxSpeed)
             {
-                
                 spriteEffects = SpriteEffects.FlipHorizontally;
                 Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
             }

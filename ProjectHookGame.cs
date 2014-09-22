@@ -2,6 +2,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using GrappleRace.GameFrameWork;
@@ -21,25 +22,16 @@ namespace ProjectHook
     /// </summary>
     public class ProjectHookGame : GameHost
     {
-        public enum Level
-        {
-            [Description("Intro")] Intro,
-            [Description("Level1")] Level1,
-            [Description("Level2")] Level2,
-            [Description("GameMenu")]
-            Menu
+        
 
-        }
-
-        public Level CurrentLevel = Level.Intro;
         private bool _canPressKey = true; //Make sure key press doesn't loop
         
         private bool _drawHitboxes;
         private SpriteFont _font;
-        private GameMenu _gameMenu;
+        private PauseMenu _pauseMenu;
 
         private GraphicsDeviceManager _graphics;
-        private IntroMenu _introMenu;
+        private TitleScreen _titleScreen;
         private TiledMap _level;
         private MapObject _mapObject;
         private Player _player1;
@@ -47,6 +39,8 @@ namespace ProjectHook
         private SpriteBatch _spriteBatch;
         private Texture2D _tiles;
         private bool _canPressEnter;
+
+        private bool initialized;
 
 
         public ProjectHookGame()
@@ -68,8 +62,6 @@ namespace ProjectHook
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
         }
 
@@ -85,28 +77,32 @@ namespace ProjectHook
             _font = Content.Load<SpriteFont>("MonoLog");
             _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
             _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
-            _introMenu = new IntroMenu(this, _font, new Vector2(0, 0));
-            _gameMenu = new GameMenu(this, _font, new Vector2(0, 0));
+            _titleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
+            _pauseMenu = new PauseMenu(this, _font, new Vector2(0, 0));
 
-            
+            Camera.Position = Vector2.Zero;
+
+            //Set start levels and menus
+            if (!initialized)
+            {
+                CurrentLevel = Globals.Levels.Level1;
+                CurrentMenu = _titleScreen;
+                initialized = true;
+            }
 
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
-            
-            //køres specifikt i update hvis level=intro eller level=gameMenu
-            //GameObjects.Add(_introMenu);
-            
-            //GameObjects.Add(_gameMenu);
 
             //Tiles
-            if (CurrentLevel.ToDescription() == "Intro")
+            if (CurrentMenu != null)
             {
-                _introMenu.ShowMenu();
+                CurrentMenu.ShowMenu();
             }
             else
             {
                 GameObjects.Add(_player1);
-                //if (_introMenu._MenuState == IntroMenu.MenuState.Multi)   
+                GameObjects.Add(_player2);
+                //if (_titleScreen._MenuState == TitleScreen.MenuState.Multi)   
                 _tiles = Content.Load<Texture2D>("tiles");
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
@@ -156,61 +152,43 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter)
             {
                 _canPressEnter = false;
-                if(CurrentLevel == Level.Intro)
-                OpenSelectedItemIntro();
-                if (CurrentLevel == Level.Menu && _gameMenu.isMenuOpen)
-                {
-                    OpenSelectedItemGameMenu();
-                }
+                CurrentMenu.OpenSelection();
             }
+
             if (Keyboard.GetState().IsKeyUp(Keys.Enter) && !_canPressEnter)
             {
                 _canPressEnter = true;
             }
-            if (CurrentLevel == Level.Intro)
-            {_introMenu.Update(gameTime);
-                if (!_introMenu.isMenuOpen)
-                {
-                    
-                }
 
-
-            }
-            if (CurrentLevel == Level.Menu)
-                _gameMenu.Update(gameTime);
-
-                //Change levels
-                if (Keyboard.GetState().IsKeyDown(Keys.F5))
-                    GoToLevel(Level.Intro);
-
-            if (Keyboard.GetState().IsKeyDown(Keys.F4) && !_gameMenu.isMenuOpen && CurrentLevel != Level.Intro)
-            {            
-                CurrentLevel = Level.Menu;
-                if (CurrentLevel == Level.Menu)
-                {       
-                
-                _gameMenu.ShowMenu();
-                }
+            //Update menu if there is one open
+            if (CurrentMenu != null)
+            {
+                CurrentMenu.Update(gameTime);
             }
 
+            //Change levels
+            if (Keyboard.GetState().IsKeyDown(Keys.F5))
+                GoToMenu(_titleScreen);
+
+            //Switch levels (admin control)
             if (Keyboard.GetState().IsKeyDown(Keys.F2))
-                    GoToLevel(Level.Level1);
+                    GoToLevel(Globals.Levels.Level1);
 
-                if (Keyboard.GetState().IsKeyDown(Keys.F3))
-                    GoToLevel(Level.Level2);
+            if (Keyboard.GetState().IsKeyDown(Keys.F3))
+                GoToLevel(Globals.Levels.Level2);
 
-                //Quit game
-                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                    Keyboard.GetState().IsKeyDown(Keys.Escape))
-                    Exit();
+            //Quit game
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
             
         
-            if(!_gameMenu.isMenuOpen)
+            if(!_pauseMenu.IsMenuOpen)
             { 
                  for (int index = 0; index < GameObjects.Count; index++)
-            {
-                GameObjects[index].Update(gameTime);
-            }
+                {
+                    GameObjects[index].Update(gameTime);
+                }
             }
 
             base.Update(gameTime);
@@ -252,8 +230,8 @@ namespace ProjectHook
             }
 
             _spriteBatch.End();
-            if(CurrentLevel==Level.Intro) _introMenu.Draw(gameTime, _spriteBatch);
-            if (CurrentLevel == Level.Menu) _gameMenu.Draw(gameTime, _spriteBatch);
+            if (CurrentLevel == Globals.Levels.TitleScreen) _titleScreen.Draw(gameTime, _spriteBatch);
+            if (CurrentLevel == Globals.Levels.PauseMenu) _pauseMenu.Draw(gameTime, _spriteBatch);
             base.Draw(gameTime);
         }
 
@@ -269,52 +247,18 @@ namespace ProjectHook
             return rectangleTexture; //return the texture
         }
 
-        public void GoToLevel(Level level)
+        public override void GoToLevel(Globals.Levels level)
         {
-            Camera.Position = Vector2.Zero;
+            CurrentMenu = null;
             UnloadContent();
             CurrentLevel = level;
             LoadContent();
         }
 
-        public void OpenSelectedItemIntro()
+        public void GoToMenu(IMenu menu)
         {
-            switch (_introMenu._MenuState)
-            {
-
-                case IntroMenu.MenuState.Single:
-                    GoToLevel(Level.Level1);
-                    break;
-                case IntroMenu.MenuState.Multi:
-                    GoToLevel(Level.Level2);
-                    GameObjects.Add(_player2);
-                    break;
-                case IntroMenu.MenuState.Options:
-                    break;
-                case IntroMenu.MenuState.Exit:
-                    Exit();
-                    break;
-
-
-            }
-
-        }
-        private void OpenSelectedItemGameMenu()
-        {
-            switch (_gameMenu._MenuState)
-            {
-                case GameMenu.MenuState.Resume:
-                    CurrentLevel = Level.Level1;
-                    _gameMenu.CloseMenu();
-                    break;
-                case GameMenu.MenuState.Options:
-                    break;
-                case GameMenu.MenuState.Exit:
-                    _gameMenu.CloseMenu();                 
-                    GoToLevel(Level.Intro);
-                    break;
-            }
-            
+            CurrentMenu = menu;
+            LoadContent();
         }
     }
 }

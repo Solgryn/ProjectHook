@@ -37,9 +37,11 @@ namespace ProjectHook.GameFrameWork
         public Dictionary<string, Texture2D> Textures { get; set; }
         // A dictionary of loaded fonts.
         public Dictionary<string, SpriteFont> Fonts { get; set; }
-        
         // A list of active game objects
         public List<GameObjectBase> GameObjects { get; set; }
+
+        public Globals.Levels CurrentLevel = Globals.Levels.TitleScreen;
+        public IMenu CurrentMenu;
 
 
         //-------------------------------------------------------------------------------------
@@ -161,6 +163,9 @@ namespace ProjectHook.GameFrameWork
             }
         }
 
-
+        public virtual void GoToLevel(Globals.Levels level)
+        {
+            
+        }
     }
 }
