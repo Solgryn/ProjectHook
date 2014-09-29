@@ -26,7 +26,6 @@ namespace ProjectHook
         
         private bool _drawHitboxes;
         private SpriteFont _font;
-        private PauseMenu _pauseMenu;
 
         private GraphicsDeviceManager _graphics;
         private TiledMap _level;
