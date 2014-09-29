@@ -10,17 +10,11 @@ using ProjectHook.GameFrameWork;
 
 namespace ProjectHook.Menu
 {
-    public class StageSelect : TextObject, IMenu
+    public class StageSelect : Menu<SpriteObject>, IMenu
     {
-        private readonly SpriteFont _font;
-        private readonly GameHost _game;
-        private readonly List<SpriteObject> _items = new List<SpriteObject>();
         public bool IsMenuOpen { get; set; }
-        private int _selectedItem;
 
         private const string Folder = "StageSelect/";
-
-        private readonly Cooldown _selectCooldown = new Cooldown(15);
 
         public enum States
         {
@@ -39,7 +33,7 @@ namespace ProjectHook.Menu
 
         public void ShowMenu()
         {
-            _selectedItem = 0;
+            Selection = 0;
             IsMenuOpen = true;
 
             //Load textures
@@ -73,19 +67,14 @@ namespace ProjectHook.Menu
                 menuItem.Position = new Vector2(x, y);
 
                 //Add objects
-                _items.Add(menuItem);
+                Items.Add(menuItem);
                 _game.GameObjects.Add(menuItem);
             }
         }
 
-        public void CloseMenu()
-        {
-            _items.Clear();
-        }
-
         public void OpenSelection()
         {
-            switch (_items[_selectedItem].SpriteTexture.Name) //Get texture name
+            switch (Items[Selection].SpriteTexture.Name) //Get texture name
             {
                 case Folder + "Stage1":
                     Game.GoToLevel(Globals.Levels.Level1);
@@ -101,31 +90,16 @@ namespace ProjectHook.Menu
 
         public override void Update(GameTime gameTime)
         {
-            var controlX = Globals.GetControl(PlayerIndex.One).X; //Get control
+            Control = Globals.GetControl(PlayerIndex.One).X; //Get control
 
-            if (controlX >= 1 && _selectCooldown.IsOff() && _selectedItem < _items.Count - 1)
-            {
-                _selectedItem++;
-                _selectCooldown.GoOnCooldown();
-            }
+            SelectionUpdate(); //Update Selection variable
 
-            if (controlX <= -1 && _selectCooldown.IsOff() && _selectedItem > 0)
-            {
-                _selectedItem--;
-                _selectCooldown.GoOnCooldown();
-            }
-
-            _selectCooldown.Decrement();
-
-            foreach (var item in _items)
+            foreach (var item in Items)
             {
                 item.SourceRect = new Rectangle(0, 0, 80, 64); //Reset all sprites
             }
 
-            _items[_selectedItem].SourceRect = new Rectangle(80, 0, 80, 64); //Change selected item sprite
-
-            if(Math.Abs(controlX) == 0)
-                _selectCooldown.Reset();
+            Items[Selection].SourceRect = new Rectangle(80, 0, 80, 64); //Change selected item sprite
         }
     }
 }

@@ -12,19 +12,14 @@ using ProjectHook.GameFrameWork;
 using ProjectHook.Menu;
 using Keyboard = Microsoft.Xna.Framework.Input.Keyboard;
 
-namespace ProjectHook
+namespace ProjectHook.Menu
 {
-    public class TitleScreen : TextObject, IMenu
+    public class TitleScreen : Menu<TextObject>, IMenu
     {
-        private readonly SpriteFont _font;
-        private readonly GameHost _game;
-        private readonly List<String> _menuItems = new List<string> {"Race", "Options", "Exit"};
-        private readonly List<TextObject> _items = new List<TextObject>();
+        private readonly List<String> _menuItems = new List<string> {"Race", "Exit"};
         private TextObject _menuitem;
         public bool IsMenuOpen { get; set; }
         private int _selectedItem;
-        private bool _canPressKeyMenuDown = true;
-        private bool _canPressKeyMenuUp = true;
 
         public enum States
         {
@@ -58,16 +53,11 @@ namespace ProjectHook
                 float x = 768/2 - _menuitem.BoundingBox.Width/2;
                 float y = 432/2 - _menuitem.BoundingBox.Height + i*30;
                 _menuitem.Position = new Vector2(x, y);
-                _items.Add(_menuitem);
+                Items.Add(_menuitem);
                 _game.GameObjects.Add(_menuitem);
             }
 
-            _items[_selectedItem].SpriteColor = Color.Green;
-        }
-
-        public void CloseMenu()
-        {
-            _items.Clear();
+            Items[_selectedItem].SpriteColor = Color.Green;
         }
 
         public void OpenSelection()
@@ -85,34 +75,16 @@ namespace ProjectHook
 
         public override void Update(GameTime gameTime)
         {
-            var controlY = Globals.GetControl(PlayerIndex.One).Y; //Get control
+            Control = Globals.GetControl(PlayerIndex.One).Y; //Get control
 
-            if (controlY == 1 && _canPressKeyMenuDown && _selectedItem != _items.Count - 1)
+            SelectionUpdate();
+
+            foreach (var item in Items)
             {
-                _canPressKeyMenuDown = false;
-                _selectedItem++;
-                _items[_selectedItem - 1].SpriteColor = Color.White; // Throws an expection!!
-                _items[_selectedItem].SpriteColor = Color.Green;
-
+                item.SpriteColor = Color.White; //Reset all sprites
             }
 
-            if (controlY == 0 && !_canPressKeyMenuDown)
-            {
-                _canPressKeyMenuDown = true;
-            }
-
-            if (controlY == -1 && _canPressKeyMenuUp && _selectedItem != 0)
-            {
-                _canPressKeyMenuUp = false;
-                _selectedItem--;
-                _items[_selectedItem + 1].SpriteColor = Color.White;
-                _items[_selectedItem].SpriteColor = Color.Green;
-            }
-
-            if (controlY == 0 && !_canPressKeyMenuUp)
-            {
-                _canPressKeyMenuUp = true;
-            }
+            Items[Selection].SpriteColor = Color.Green;
         }
     }
 }

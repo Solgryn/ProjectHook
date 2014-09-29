@@ -41,11 +41,10 @@
     <Compile Include="Cooldown.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Globals.cs" />
-    <Compile Include="Menu\PauseMenu.cs" />
+    <Compile Include="Menu\Menu.cs" />
     <Compile Include="Menu\IMenu.cs" />
     <Compile Include="Menu\StageSelect.cs" />
     <Compile Include="Menu\TitleScreen.cs" />
-    <Compile Include="Menu\MenuState.cs" />
     <Compile Include="ProjectHookGame.cs" />
     <Compile Include="GameFrameWork\BenchmarkObject.cs" />
     <Compile Include="GameFrameWork\Camera.cs" />
