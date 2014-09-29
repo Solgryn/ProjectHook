@@ -167,5 +167,10 @@ namespace ProjectHook.GameFrameWork
         {
             
         }
+
+        public virtual void GoToMenu(IMenu menu)
+        {
+
+        }
     }
 }

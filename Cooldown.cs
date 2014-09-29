@@ -25,5 +25,10 @@ namespace ProjectHook
         {
             Count = Max;
         }
+
+        public void Reset()
+        {
+            Count = 0;
+        }
     }
 }

@@ -11,7 +11,9 @@ namespace ProjectHook
     public interface IMenu
     {
         void ShowMenu();
+        void CloseMenu();
         void Update(GameTime gameTime);
         void OpenSelection();
+        void Draw(GameTime gameTime, SpriteBatch spriteBatch);
     }
 }

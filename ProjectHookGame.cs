@@ -22,8 +22,6 @@ namespace ProjectHook
     /// </summary>
     public class ProjectHookGame : GameHost
     {
-        
-
         private bool _canPressKey = true; //Make sure key press doesn't loop
         
         private bool _drawHitboxes;
@@ -31,7 +29,6 @@ namespace ProjectHook
         private PauseMenu _pauseMenu;
 
         private GraphicsDeviceManager _graphics;
-        private TitleScreen _titleScreen;
         private TiledMap _level;
         private MapObject _mapObject;
         private Player _player1;
@@ -62,6 +59,12 @@ namespace ProjectHook
         /// </summary>
         protected override void Initialize()
         {
+            _font = Content.Load<SpriteFont>("MonoLog");
+
+            //Setup menus
+            Globals.TitleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
+            Globals.StageSelect = new StageSelect(this, _font, new Vector2(0, 0));
+
             base.Initialize();
         }
 
@@ -74,11 +77,9 @@ namespace ProjectHook
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             var fishTx = Content.Load<Texture2D>("fish");
-            _font = Content.Load<SpriteFont>("MonoLog");
+            
             _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
             _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
-            _titleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
-            _pauseMenu = new PauseMenu(this, _font, new Vector2(0, 0));
 
             Camera.Position = Vector2.Zero;
 
@@ -86,14 +87,14 @@ namespace ProjectHook
             if (!initialized)
             {
                 CurrentLevel = Globals.Levels.Level1;
-                CurrentMenu = _titleScreen;
+                CurrentMenu = Globals.TitleScreen;
                 initialized = true;
             }
 
             Collections.Players.Add(_player1);
             Collections.Players.Add(_player2);
 
-            //Tiles
+            //Show menu else show level
             if (CurrentMenu != null)
             {
                 CurrentMenu.ShowMenu();
@@ -164,7 +165,7 @@ namespace ProjectHook
 
             //Change levels
             if (Keyboard.GetState().IsKeyDown(Keys.F5))
-                GoToMenu(_titleScreen);
+                GoToMenu(Globals.TitleScreen);
 
             //Switch levels (admin control)
             if (Keyboard.GetState().IsKeyDown(Keys.F2))
@@ -178,13 +179,13 @@ namespace ProjectHook
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
         
-            if(!_pauseMenu.IsMenuOpen)
-            { 
-                 for (int index = 0; index < GameObjects.Count; index++)
+            //if(!_pauseMenu.IsMenuOpen)
+            //{ 
+                for (var i = 0; i < GameObjects.Count; i++)
                 {
-                    GameObjects[index].Update(gameTime);
+                    GameObjects[i].Update(gameTime);
                 }
-            }
+            //}
 
             base.Update(gameTime);
         }
@@ -199,12 +200,13 @@ namespace ProjectHook
 
             _spriteBatch.Begin();
 
-            foreach (Tile tile in Collections.Tiles)
+            foreach (var tile in Collections.Tiles)
             {
                 tile.Draw(gameTime, _spriteBatch);
             }
-            foreach (SpriteObject gameObject in GameObjects)
+            foreach (var gameObjectBase in GameObjects)
             {
+                var gameObject = (SpriteObject) gameObjectBase;
                 gameObject.Draw(gameTime, _spriteBatch);
             }
 
@@ -212,8 +214,9 @@ namespace ProjectHook
             //Draw hitboxes
             if (_drawHitboxes)
             {
-                foreach (SpriteObject gameObject in GameObjects)
+                foreach (var gameObjectBase in GameObjects)
                 {
+                    var gameObject = (SpriteObject) gameObjectBase;
                     _spriteBatch.Draw(
                         generateTexture2D(gameObject.BoundingBox.Width, gameObject.BoundingBox.Height, Color.Red),
                         new Vector2(gameObject.BoundingBox.Location.X + (-Camera.Position.X),
@@ -222,8 +225,11 @@ namespace ProjectHook
             }
 
             _spriteBatch.End();
-            if (CurrentLevel == Globals.Levels.TitleScreen) _titleScreen.Draw(gameTime, _spriteBatch);
-            if (CurrentLevel == Globals.Levels.PauseMenu) _pauseMenu.Draw(gameTime, _spriteBatch);
+
+            //Draw menu, if there is one
+            if(CurrentMenu != null)
+                CurrentMenu.Draw(gameTime, _spriteBatch);
+
             base.Draw(gameTime);
         }
 
@@ -231,7 +237,7 @@ namespace ProjectHook
         {
             var rectangleTexture = new Texture2D(GraphicsDevice, width, height, false, SurfaceFormat.Color);
             var color = new Color[width*height];
-            for (int i = 0; i < color.Length; i++)
+            for (var i = 0; i < color.Length; i++)
             {
                 color[i] = textureColor;
             }
@@ -241,17 +247,25 @@ namespace ProjectHook
 
         public override void GoToLevel(Globals.Levels level)
         {
-            CurrentMenu = null;
+            CloseCurrentMenu();
             UnloadContent();
             CurrentLevel = level;
             LoadContent();
         }
 
-        public void GoToMenu(IMenu menu)
+        public override void GoToMenu(IMenu menu)
         {
+            CloseCurrentMenu();
             CurrentMenu = menu;
             UnloadContent();
             LoadContent();
+        }
+
+        public void CloseCurrentMenu()
+        {
+            if (CurrentMenu == null) return;
+            CurrentMenu.CloseMenu();
+            CurrentMenu = null;
         }
     }
 }

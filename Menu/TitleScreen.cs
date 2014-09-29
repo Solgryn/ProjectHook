@@ -14,28 +14,26 @@ using Keyboard = Microsoft.Xna.Framework.Input.Keyboard;
 
 namespace ProjectHook
 {
-    internal class TitleScreen : TextObject, IMenu
+    public class TitleScreen : TextObject, IMenu
     {
         private readonly SpriteFont _font;
         private readonly GameHost _game;
         private readonly List<String> _menuItems = new List<string> {"Race", "Options", "Exit"};
         private readonly List<TextObject> _items = new List<TextObject>();
-        private SpriteObject _menu;
         private TextObject _menuitem;
         public bool IsMenuOpen { get; set; }
         private int _selectedItem;
         private bool _canPressKeyMenuDown = true;
         private bool _canPressKeyMenuUp = true;
 
-        internal enum States
+        public enum States
         {
             Race,
             Options,
             Exit,
         }
 
-        States _menuState;
-        public States _MenuState { get { return _menuState; } set { _menuState = value; } }
+        public States MenuState { get; set; }
 
         public TitleScreen(GameHost game, SpriteFont font, Vector2 position) : base(game, font, position)
         {
@@ -45,16 +43,15 @@ namespace ProjectHook
 
         public void ShowMenu()
         {
-            IsMenuOpen = true;
-            var menubg = Game.Content.Load<Texture2D>("menubg");
-            var title = Game.Content.Load<Texture2D>("title");
+            _selectedItem = 0;
 
-            _menu = new SpriteObject(_game, new Vector2(0, 0), menubg);
-            var _title = new SpriteObject(_game, new Vector2(32, 175), title); //ATM, I don't know why these magic numbers work to center the image (35, 175)
-            _menu.SpriteColor = new Color(0, 0, 0, 150);
-            Game.GameObjects.Add(_menu);
+            IsMenuOpen = true;
+            var titleTex = Game.Content.Load<Texture2D>("TitleScreen/Background");
+
+            var _title = new SpriteObject(_game, new Vector2(32, 175), titleTex); //ATM, I don't know why these magic numbers work to center the image (35, 175)
+
             Game.GameObjects.Add(_title);
-            for (int i = 0; i < _menuItems.Count; i++)
+            for (var i = 0; i < _menuItems.Count; i++)
             {
                 _menuitem = new TextObject(_game, _font, new Vector2(0, 0), _menuItems[i]);
                 //Centers the text
@@ -64,7 +61,13 @@ namespace ProjectHook
                 _items.Add(_menuitem);
                 _game.GameObjects.Add(_menuitem);
             }
+
             _items[_selectedItem].SpriteColor = Color.Green;
+        }
+
+        public void CloseMenu()
+        {
+            _items.Clear();
         }
 
         public void OpenSelection()
@@ -72,7 +75,7 @@ namespace ProjectHook
             switch (_menuItems[_selectedItem])
             {
                 case "Race":
-                    Game.GoToLevel(Globals.Levels.Level1);
+                    Game.GoToMenu(Globals.StageSelect);
                     break;
                 case "Exit":
                     Game.Exit();
@@ -82,7 +85,7 @@ namespace ProjectHook
 
         public override void Update(GameTime gameTime)
         {
-            var controlY = Globals.GetControl(PlayerIndex.One).Y;
+            var controlY = Globals.GetControl(PlayerIndex.One).Y; //Get control
 
             if (controlY == 1 && _canPressKeyMenuDown && _selectedItem != _items.Count - 1)
             {

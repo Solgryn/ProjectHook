@@ -43,6 +43,7 @@
     <Compile Include="Globals.cs" />
     <Compile Include="Menu\PauseMenu.cs" />
     <Compile Include="Menu\IMenu.cs" />
+    <Compile Include="Menu\StageSelect.cs" />
     <Compile Include="Menu\TitleScreen.cs" />
     <Compile Include="Menu\MenuState.cs" />
     <Compile Include="ProjectHookGame.cs" />
@@ -95,13 +96,25 @@
     <Content Include="Content\menubg.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\StageSelect\Background.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\StageSelect\Stage1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\StageSelect\Stage2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\StageSelect\Stage3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\tile.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\tiles.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\title.png">
+    <Content Include="Content\Titlescreen\Background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />

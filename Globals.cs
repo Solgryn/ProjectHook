@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using ProjectHook.Menu;
 
 namespace ProjectHook
 {
@@ -12,6 +13,10 @@ namespace ProjectHook
     {
         public const string LAYER_SOLID = "Solid";
         public const string LAYER_BAD = "Bad";
+
+
+        public static TitleScreen TitleScreen;
+        public static StageSelect StageSelect;
 
         public enum Levels
         {
@@ -21,7 +26,7 @@ namespace ProjectHook
             Level1,
             [Description("Level2")]
             Level2,
-            RaceMenu
+            StageSelect
         }
 
         public static Vector2 GetControl(PlayerIndex index)
