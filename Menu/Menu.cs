@@ -31,24 +31,18 @@ namespace ProjectHook.Menu
 
         public virtual void SelectionUpdate()
         {
-            //Move plus
-            if (Control >= 1 && SelectCooldown.IsOff() && Selection < Items.Count - 1)
+            //move selection
+            if (Math.Abs(Control) > 0.5f && SelectCooldown.IsOff())
             {
-                Selection++;
-                SelectCooldown.GoOnCooldown();
-            }
-
-            //Move minus
-            if (Control <= -1 && SelectCooldown.IsOff() && Selection > 0)
-            {
-                Selection--;
+                Selection += Convert.ToInt16(Math.Round(Control)); //Returns either -1 or 1
+                Selection = MathHelper.Clamp(Selection, 0, Items.Count - 1); //Adds the control to the selection, and keeps it within the menu range
                 SelectCooldown.GoOnCooldown();
             }
 
             SelectCooldown.Decrement();
 
             //Reset cooldown if no control is held
-            if (Control == 0)
+            if (Math.Abs(Control) < 0.5f)
                 SelectCooldown.Reset();
         }
     }
