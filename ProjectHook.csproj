@@ -43,7 +43,6 @@
     <Compile Include="Globals.cs" />
     <Compile Include="Menu\Menu.cs" />
     <Compile Include="Menu\IMenu.cs" />
-    <Compile Include="Menu\ResultScreen.cs" />
     <Compile Include="Menu\StageSelect.cs" />
     <Compile Include="Menu\TitleScreen.cs" />
     <Compile Include="ProjectHookGame.cs" />
@@ -62,6 +61,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameFrameWork\Tile.cs" />
+    <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">

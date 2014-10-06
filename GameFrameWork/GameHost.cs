@@ -172,5 +172,10 @@ namespace ProjectHook.GameFrameWork
         {
 
         }
+
+        public virtual void FinishTime()
+        {
+
+        }
     }
 }

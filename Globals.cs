@@ -13,6 +13,7 @@ namespace ProjectHook
     {
         public const string LAYER_SOLID = "Solid";
         public const string LAYER_BAD = "Bad";
+        public const string LAYER_GOAL = "Goal";
 
 
         public static TitleScreen TitleScreen;

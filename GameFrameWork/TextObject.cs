@@ -12,7 +12,7 @@ namespace GrappleRace.GameFrameWork
         // Class variables
 
         // A reference to the font that we are using
-        private SpriteFont _font;
+        public SpriteFont _font;
         // The text to display
         private string _text;
         // Text alignment

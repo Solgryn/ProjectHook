@@ -27,6 +27,9 @@ namespace ProjectHook
         private bool _drawHitboxes;
         private SpriteFont _font;
 
+        private Timer _timer;
+        private TextObject _record;
+
         private GraphicsDeviceManager _graphics;
         private TiledMap _level;
         private MapObject _mapObject;
@@ -80,7 +83,11 @@ namespace ProjectHook
             _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
             _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
 
+            _font = Content.Load<SpriteFont>("MonoLog");
+
             Camera.Position = Vector2.Zero;
+
+            _timer = new Timer(this, _font, new Vector2(10, 10));
 
             //Set start levels and menus
             if (!initialized)
@@ -106,6 +113,11 @@ namespace ProjectHook
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
 
+                _record = new TextObject(this, _font, new Vector2(700, 10), _timer.ShowLevelRecord(CurrentLevel));
+                GameObjects.Add(_record);
+                
+                GameObjects.Add(_timer);
+               
                 GameObjects.Add(_mapObject);
             }
         }
@@ -128,6 +140,7 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+
             //Set camera position
             Camera.Position.X =
                 Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f);
@@ -148,7 +161,7 @@ namespace ProjectHook
 
 
             //Menu controls
-            if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter)
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter && CurrentMenu != null)
             {
                 _canPressEnter = false;
                 CurrentMenu.OpenSelection();
@@ -258,6 +271,11 @@ namespace ProjectHook
             CurrentMenu = menu;
             UnloadContent();
             LoadContent();
+        }
+
+        public override void FinishTime()
+        {
+            _timer.FinishTime(CurrentLevel);
         }
 
         public void CloseCurrentMenu()

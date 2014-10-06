@@ -244,8 +244,9 @@ namespace ProjectHook
 
             if (IsOutOfFrame(256) || PositionX + 16 < Camera.Position.X || OverlapsTileLayer(BoundingBox, Globals.LAYER_BAD))
                 Die();
-            if (OverlapsTileLayer(BoundingBox, Globals.LAYER_GOAL))
-                Game.GoToMenu(Game.CurrentMenu);
+<<<<<<< Updated upstream
+
+            //Get ammo
             var ammoCrate = OverlapsTileType(BoundingBox, "ammo");
             if (ammoCrate != null)
             {
@@ -257,9 +258,12 @@ namespace ProjectHook
             if (OverlapsTileType(BoundingBox, "goal") != null)
             {
                 Game.GoToMenu(Globals.StageSelect);
-                Game.FinishTime();
             }
 
+=======
+            if (OverlapsTileLayer(BoundingBox, Globals.LAYER_GOAL))
+                Game.GoToMenu(Game.CurrentMenu);
+>>>>>>> Stashed changes
             #region Animations
             //Set animations
             if (Velocity.X == 0 && OnGround)
