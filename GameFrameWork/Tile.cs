@@ -12,12 +12,14 @@ namespace ProjectHook
     public class Tile : SpriteObject
     {
         public string LayerName;
-        public Tile(GameHost game, Vector2 position, Texture2D texture, Rectangle sourceRect, string layerName)
+        public string ObjType;
+        public Tile(GameHost game, Vector2 position, Texture2D texture, Rectangle sourceRect, string layerName, string objType)
             : base(game, position, texture)
         {
             SpriteTexture = texture;
             SourceRect = sourceRect;
             LayerName = layerName;
+            ObjType = objType;
         }
     }
 }

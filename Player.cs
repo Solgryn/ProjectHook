@@ -19,6 +19,7 @@ namespace ProjectHook
         public float JumpStrength = -10f;
         public bool OnGround = false;
         public bool CanJump = true;
+        public int Ammo = 1;
 
         private double _animationCounter;
         private double _animationSpeed;
@@ -244,6 +245,20 @@ namespace ProjectHook
             if (IsOutOfFrame(256) || PositionX + 16 < Camera.Position.X || OverlapsTileLayer(BoundingBox, Globals.LAYER_BAD))
                 Die();
 
+            //Get ammo
+            var ammoCrate = OverlapsTileType(BoundingBox, "ammo");
+            if (ammoCrate != null)
+            {
+                Collections.Tiles.Remove(ammoCrate);
+                Ammo++;
+            }
+
+            //Goal
+            if (OverlapsTileType(BoundingBox, "goal") != null)
+            {
+                Game.GoToMenu(Globals.StageSelect);
+            }
+
             #region Animations
             //Set animations
             if (Velocity.X == 0 && OnGround)
@@ -280,8 +295,10 @@ namespace ProjectHook
 
         public void ThrowHook()
         {
+            if(Ammo == 0) return;
             var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), this, 15);
             Game.GameObjects.Add(hook);
+            Ammo--;
         }
 
         //Player gets hit by hook

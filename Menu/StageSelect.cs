@@ -12,8 +12,6 @@ namespace ProjectHook.Menu
 {
     public class StageSelect : Menu<SpriteObject>, IMenu
     {
-        public bool IsMenuOpen { get; set; }
-
         private const string Folder = "StageSelect/";
 
         public enum States
@@ -34,10 +32,9 @@ namespace ProjectHook.Menu
         public void ShowMenu()
         {
             Selection = 0;
-            IsMenuOpen = true;
 
             //Load textures
-            var bgTex = Game.Content.Load<Texture2D>("StageSelect/Background");
+            var bgTex = Game.Content.Load<Texture2D>(Folder + "Background");
 
             var stages = new List<Texture2D>
             {

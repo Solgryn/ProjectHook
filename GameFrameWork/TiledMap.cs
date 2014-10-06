@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Xml;
+using System.Xml.Schema;
 using Microsoft.Xna.Framework;
 
 namespace LevelReader.GameFrameWork
@@ -12,6 +14,7 @@ namespace LevelReader.GameFrameWork
         #region Variables
         private Dictionary<String, int[,]> _layers;
         private List<String> _layerNames;
+        private Dictionary<int, string> _tileTypes = new Dictionary<int, string>(); 
         private int _width;
         private int _height;
         private int _tileWidth;
@@ -58,23 +61,33 @@ namespace LevelReader.GameFrameWork
             get { return _imageWidth; }
         }
 
+        public Dictionary<int, string> TileTypes { get { return _tileTypes; } } 
+
         #endregion
 
         #region Constructor
         public TiledMap(String xmlFile)
         {
+            Debug.WriteLine(xmlFile);
             try
             {
-                XmlReader reader = XmlReader.Create(xmlFile);
+                var reader = XmlReader.Create(xmlFile);
 
                 _layerNames = new List<string>();
                 _layers = new Dictionary<string, int[,]>();
 
-                Queue<int> tempTileValue = new Queue<int>();
+                var tempTileValue = new Queue<int>();
+                var tempTileId = 0;
 
                 while (reader.Read())
                     if (reader.IsStartElement())
                     {
+                        //Get properties
+                        if (reader.Name == "property")
+                        {
+                            _tileTypes[tempTileId] = Convert.ToString(reader.GetAttribute("value"));
+                        }
+
                         if (reader.Name == "map")
                         {
                             _orientation = (reader.GetAttribute("orientation"));
@@ -82,7 +95,7 @@ namespace LevelReader.GameFrameWork
                             _height = Convert.ToInt32(reader.GetAttribute("height"));
                             _tileWidth = Convert.ToInt32(reader.GetAttribute("tilewidth"));
                             _tileHeight = Convert.ToInt32(reader.GetAttribute("tileheight"));
-                            string backgroundColor = reader.GetAttribute("backgroundcolor");
+                            var backgroundColor = reader.GetAttribute("backgroundcolor");
                             if (backgroundColor != null)
                             _backgroundcolor = new Color(
                                 Convert.ToInt32(backgroundColor.Substring(1, 2), 16),
@@ -102,7 +115,7 @@ namespace LevelReader.GameFrameWork
 
                         if (reader.Name == "layer")
                         {
-                            string name = reader.GetAttribute("name");
+                            var name = reader.GetAttribute("name");
                             _layerNames.Add(name);
                             _layers.Add(name, new int[Height, Width]);
                         }
@@ -111,17 +124,21 @@ namespace LevelReader.GameFrameWork
                         {
                             // add tile value to the temporary list
                             tempTileValue.Enqueue(Convert.ToInt32(reader.GetAttribute("gid")));
+                            if (reader.GetAttribute("id") != null)
+                            {
+                                tempTileId = Convert.ToInt32(reader.GetAttribute("id")) + 1; //Properties are offset by 1
+                            }
                         }
 
                         // if temp list holds full layer
                         if (tempTileValue.Count == _width * _height)
                         {
                             // add layer tiles from temporary list to layer
-                            for (int i = 0; i < _height; i++)
+                            for (var i = 0; i < _height; i++)
                             {
-                                for (int j = 0; j < _width; j++)
+                                for (var j = 0; j < _width; j++)
                                 {
-                                    int[,] layer = _layers[_layerNames[_layerNames.Count-1]];
+                                    var layer = _layers[_layerNames[_layerNames.Count - 1]]; 
                                     layer[i, j] = tempTileValue.Dequeue();
                                 }
                             }
@@ -139,7 +156,6 @@ namespace LevelReader.GameFrameWork
             }
         }
         #endregion
-
 
     }
 }

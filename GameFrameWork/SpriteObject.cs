@@ -244,6 +244,16 @@ namespace GrappleRace.GameFrameWork
             return false;
         }
 
+        public Tile OverlapsTileType(Rectangle hitbox, string type)
+        {
+            foreach (var tile in Collections.Tiles)
+            {
+                if (hitbox.Intersects(tile.BoundingBox) && tile.ObjType == type)
+                    return tile;
+            }
+            return null;
+        }
+
         //Get -1 if facing left, 1 is facing right
         public int GetDirection()
         {

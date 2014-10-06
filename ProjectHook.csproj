@@ -43,6 +43,7 @@
     <Compile Include="Globals.cs" />
     <Compile Include="Menu\Menu.cs" />
     <Compile Include="Menu\IMenu.cs" />
+    <Compile Include="Menu\ResultScreen.cs" />
     <Compile Include="Menu\StageSelect.cs" />
     <Compile Include="Menu\TitleScreen.cs" />
     <Compile Include="ProjectHookGame.cs" />

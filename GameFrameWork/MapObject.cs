@@ -23,6 +23,7 @@ namespace LevelReader.GameFrameWork
 
             _tiledMap = tiledMap;
             _tilesPrRow = _tiledMap.ImageWidth / (_tiledMap.TileWidth + _tiledMap.TileSetSpacing);
+            var tileTypes = _tiledMap.TileTypes;
 
             foreach (var layername in _tiledMap.LayerNames)
             {
@@ -34,6 +35,10 @@ namespace LevelReader.GameFrameWork
 
                         if (gidValue != 0)
                         {
+                            var currentTileType = "";
+                            if (tileTypes.ContainsKey(gidValue))
+                                currentTileType = tileTypes[gidValue];
+
                             _tilesPrRow = Math.Max(_tilesPrRow, 1);
                             var x = (gidValue - 1) % _tilesPrRow * (_tiledMap.TileWidth + _tiledMap.TileSetSpacing);
                             var y = ((gidValue - 1) / _tilesPrRow) * (_tiledMap.TileHeight + _tiledMap.TileSetSpacing);
@@ -42,7 +47,9 @@ namespace LevelReader.GameFrameWork
                                 new Vector2(i * _tiledMap.TileWidth * ScaleX + PositionX, j * _tiledMap.TileHeight * ScaleY + PositionY),
                                 SpriteTexture,
                                 new Rectangle(x, y, _tiledMap.TileWidth, _tiledMap.TileHeight),
-                                layername);
+                                layername,
+                                currentTileType);
+                            
 
                             Collections.Tiles.Add(tile);
                         }
