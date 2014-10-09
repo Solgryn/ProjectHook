@@ -238,13 +238,16 @@ namespace GrappleRace.GameFrameWork
         {
             foreach (var tile in Collections.Tiles)
             {
-                if (tile.LayerName == layerName)
+                //This function is very costly, so a lot of checks are made to ensure the game doesn't lag
+
+                if (tile.LayerName == layerName) //Don't continue if the tile is on the right layer
                 {
-                    if (!tile.IsOutOfFrame(0))
+                    if (!tile.IsOutOfFrame(0)) //Don't continue if the tile is out of the frame
                     {
-                        var hitboxLocation = new Vector2(hitbox.Location.X + hitbox.Width / 2f,
+                        var hitboxLocation = new Vector2(hitbox.Location.X + hitbox.Width / 2f, //Find where the hitbox is
                             hitbox.Location.Y + hitbox.Height / 2f);
-                        if (Vector2.Distance(tile.Position, hitboxLocation) < 64) //If the tile is close to the hitbox location
+                        //If the tile is close to the hitbox location (64 pixels), check if it intersects the hitbox
+                        if (Vector2.Distance(tile.Position, hitboxLocation) < 64)
                         {
                             if (hitbox.Intersects(tile.BoundingBox))
                                 return true;
@@ -270,7 +273,7 @@ namespace GrappleRace.GameFrameWork
             return null;
         }
 
-        //Get -1 if facing left, 1 is facing right
+        //Get -1 if facing left, 1 is facing right (Useful for sending objects left or right)
         public int GetDirection()
         {
             if (spriteEffects == SpriteEffects.FlipHorizontally) return -1;
@@ -278,7 +281,7 @@ namespace GrappleRace.GameFrameWork
             return 0;
         }
 
-        //Remove the object from the game
+        //Remove the object from the game, can be overridden to add effects when destroyed
         public virtual void Destroy()
         {
             Game.GameObjects.Remove(this);

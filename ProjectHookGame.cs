@@ -31,10 +31,8 @@ namespace ProjectHook
         public Race CurrentRace;
         private TextObject FirstPlace;
 
-        private FontRenderer _fontRenderer;
-
-        private Timer _timer;
-        private TextObject _record;
+        private FontRenderer RaceTimerText;
+        private FontRenderer FirstPlaceText;
 
         private GraphicsDeviceManager _graphics;
         private TiledMap _level;
@@ -74,6 +72,9 @@ namespace ProjectHook
             Globals.TitleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
             Globals.StageSelect = new StageSelect(this, _font, new Vector2(0, 0));
 
+            CurrentLevel = Globals.Levels.None;
+
+            //Set to full screen
             //_graphics.IsFullScreen = true;
             //_graphics.ApplyChanges();
 
@@ -92,16 +93,18 @@ namespace ProjectHook
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            if (CurrentLevel != null)
+            //Only load players if in a level
+            if (CurrentLevel != Globals.Levels.None)
             {
                 var fishTx = Content.Load<Texture2D>("fish");
                 _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
                 _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
+                Collections.Players.Add(_player1);
+                Collections.Players.Add(_player2);
             }
 
+            //Reset camera position
             Camera.Position = Vector2.Zero;
-
-            //_timer = new Timer(this, _font, new Vector2(10, 10));
 
             //Set start levels and menus
             if (!initialized)
@@ -110,9 +113,6 @@ namespace ProjectHook
                 CurrentMenu = Globals.TitleScreen;
                 initialized = true;
             }
-
-            Collections.Players.Add(_player1);
-            Collections.Players.Add(_player2);
 
             //Show menu else show level
             if (CurrentMenu != null)
@@ -124,23 +124,14 @@ namespace ProjectHook
                 GameObjects.Add(_player1);
                 GameObjects.Add(_player2); 
                 _tiles = Content.Load<Texture2D>("tiles");
-                _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
-                _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
+                _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx"); //Which level to load
+                _mapObject = new MapObject(this, new Vector2(-64, 0), _tiles, _level); //Adds the level tiles to the global collection
 
-                var fontFilePath = Path.Combine(Content.RootDirectory, "bitmapfont.fnt");
-                var fontFile = FontLoader.Load(fontFilePath);
-                var fontTexture = Content.Load<Texture2D>("bitmapfont_0.png");
-
-                _fontRenderer = new FontRenderer(fontFile, fontTexture);
-                _fontRenderer.Text = "hej";
-                Collections.Fonts.Add(_fontRenderer);
-
-                FirstPlace = new TextObject(this, _font, new Vector2(10, 10), "Who's in first place?");
-                GameObjects.Add(FirstPlace);
-                //_record = new TextObject(this, _font, new Vector2(700, 10), _timer.ShowLevelRecord(CurrentLevel));
-                //GameObjects.Add(_record);
-                
-                //GameObjects.Add(_timer);
+                //Make bitmap texts
+                RaceTimerText = NewFont("bitmapfont", new Vector2(Camera.Width/2f, 8), FontRenderer.FontDisplays.Center);
+                Collections.Fonts.Add(RaceTimerText);
+                FirstPlaceText = NewFont("bitmapfont", new Vector2(0, 48), FontRenderer.FontDisplays.Center);
+                Collections.Fonts.Add(FirstPlaceText);
             }
         }
 
@@ -150,9 +141,11 @@ namespace ProjectHook
         /// </summary>
         protected override void UnloadContent()
         {
+            CurrentRace = null;
             GameObjects.Clear();
             Collections.Players.Clear();
             Collections.Tiles.Clear();
+            Collections.Fonts.Clear();
         }
 
         /// <summary>
@@ -162,14 +155,18 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            //Set camera position
-            Camera.Position.X =
-                Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f);
-            //Set x position to average of all players
-            Camera.Position.Y = 0;
+            //Only change the camera if in a level
+            if (CurrentLevel != Globals.Levels.None)
+            {
+                //Set camera position
+                Camera.Position.X =
+                    Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f);
+                //Set x position to average of all players
+                Camera.Position.Y = 0;
 
-            Camera.Position.X = Math.Max(Camera.Position.X, 0); //Limit camera
-
+                Camera.Position.X = Math.Max(Camera.Position.X, 0); //Limit camera
+            }
+            
             //Toggle drawing of hitboxes
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && _canPressKey)
             {
@@ -217,11 +214,13 @@ namespace ProjectHook
                 GameObjects[i].Update(gameTime);
             }
 
-            //In a level, racing
+            //If in a level and racing, display the timer and who's in the lead
             if (CurrentLevel != null && CurrentRace != null)
             {
                 CurrentRace.Update(gameTime);
-                FirstPlace.Text = "Player " + CurrentRace.GetFirstPlace() + " is in the lead!";
+                FirstPlaceText.Text = "Player " + CurrentRace.GetFirstPlace() + " is in the lead!\n";
+                FirstPlaceText.Position.X = Camera.Width/2f;
+                RaceTimerText.Text = CurrentRace.Timer.GetAsText();
             }
 
             base.Update(gameTime);
@@ -237,23 +236,23 @@ namespace ProjectHook
 
             _spriteBatch.Begin();
 
+            //Draw tiles
             foreach (var tile in Collections.Tiles)
             {
                 tile.Draw(gameTime, _spriteBatch);
             }
+            //Draw game objects
             foreach (var gameObjectBase in GameObjects)
             {
                 var gameObject = (SpriteObject) gameObjectBase;
                 gameObject.Draw(gameTime, _spriteBatch);
             }
-
+            //Draw bitmap fonts
             foreach (var fontRenderer in Collections.Fonts)
             {
-                fontRenderer.DrawText(_spriteBatch, 50, 50);
+                fontRenderer.DrawText(_spriteBatch);
             }
             
-
-
             //Draw hitboxes
             if (_drawHitboxes)
             {
@@ -295,22 +294,18 @@ namespace ProjectHook
             CurrentLevel = level;
             LoadContent();
 
-            //Start new race
+            //Start new race when a new level is started
             CurrentRace = new Race();
             CurrentRace.StartRace();
         }
 
         public override void GoToMenu(IMenu menu)
         {
+            CurrentLevel = Globals.Levels.None;
             CloseCurrentMenu();
             CurrentMenu = menu;
             UnloadContent();
             LoadContent();
-        }
-
-        public override void FinishTime()
-        {
-            //_timer.FinishTime(CurrentLevel);
         }
 
         public void CloseCurrentMenu()
@@ -318,6 +313,16 @@ namespace ProjectHook
             if (CurrentMenu == null) return;
             CurrentMenu.CloseMenu();
             CurrentMenu = null;
+        }
+
+        //Add a new bitmap text, uses code from http://www.craftworkgames.com/blog/tutorial-bmfont-rendering-with-monogame/
+        public FontRenderer NewFont(string name, Vector2 position, FontRenderer.FontDisplays fontDisplay)
+        {
+            var fontFilePath = Path.Combine(Content.RootDirectory, name + ".fnt");
+            var fontFile = FontLoader.Load(fontFilePath);
+            var fontTexture = Content.Load<Texture2D>(name + "_0.png");
+
+            return new FontRenderer(fontFile, fontTexture, position, fontDisplay);
         }
     }
 }

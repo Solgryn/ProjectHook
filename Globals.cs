@@ -21,6 +21,7 @@ namespace ProjectHook
 
         public enum Levels
         {
+            None,
             TitleScreen,
             PauseMenu,
             [Description("Level1")]

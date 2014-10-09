@@ -46,8 +46,11 @@ namespace ProjectHook
 
         private bool _jumpKey;
         private bool _grappleKey;
+
+        //Cooldowns
         private readonly Cooldown _grappleCooldown = new Cooldown(40);
 
+        //Debuffs
         private readonly Cooldown _slowDebuff = new Cooldown(100);
 
         //Animations
@@ -84,6 +87,7 @@ namespace ProjectHook
             }
             BoundingBox = new Rectangle(16, 16, 32, 48);
 
+            //Make the text above the players
             IndexText = new TextObject(Game, Game.Fonts["thefont"], new Vector2(0, 0));
             IndexText.Text = playerIndex.ToString();
             Game.GameObjects.Add(IndexText);
@@ -262,12 +266,19 @@ namespace ProjectHook
             //Display font above head
             IndexText.Position = new Vector2(PositionX-Camera.Position.X-24, PositionY - 48);
 
+            #region Player dies
+            //If out of frame, die
             if (IsOutOfFrame(256) || PositionX + 16 < Camera.Position.X || OverlapsTileLayer(BoundingBox, Globals.LAYER_BAD))
                 Die();
+            #endregion
+
+            //Player reaches the goal
             if (OverlapsTileLayer(BoundingBox, Globals.LAYER_GOAL))
                 Game.GoToMenu(Game.CurrentMenu);
-            var ammoCrate = OverlapsTileType(BoundingBox, "ammo");
-            if (ammoCrate != null)
+
+            //Get ammo
+            var ammoCrate = OverlapsTileType(BoundingBox, "ammo"); //Check if there's an ammo crate where you are
+            if (ammoCrate != null) //If there is, get ammo and destroy the crate
             {
                 Collections.Tiles.Remove(ammoCrate);
                 Ammo++;
@@ -289,8 +300,6 @@ namespace ProjectHook
             if (!OnGround)
                 ChangeAnimation((Animations.Jumping));
 
-                
-            
             //Animation frame
             _animationCounter += _animationSpeed;
             if (_animationCounter >= 100)

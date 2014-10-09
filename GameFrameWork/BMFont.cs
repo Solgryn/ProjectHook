@@ -11,6 +11,9 @@ using Microsoft.Xna.Framework;
 
 namespace ProjectHook.GameFrameWork
 {
+    /// <summary>
+    /// Lots of hard-coding, code from http://www.craftworkgames.com/blog/tutorial-bmfont-rendering-with-monogame/
+    /// </summary>
     [Serializable]
     [XmlRoot("font")]
     public class FontFile

@@ -50,8 +50,8 @@ namespace ProjectHook.Menu
             {
                 _menuitem = new TextObject(_game, _font, new Vector2(0, 0), _menuItems[i]);
                 //Centers the text
-                float x = 768/2 - _menuitem.BoundingBox.Width/2;
-                float y = 432/2 - _menuitem.BoundingBox.Height + i*30;
+                float x = Camera.Width/2 - _menuitem.BoundingBox.Width/2;
+                float y = Camera.Height/2 - _menuitem.BoundingBox.Height + i*30;
                 _menuitem.Position = new Vector2(x, y);
                 Items.Add(_menuitem);
                 _game.GameObjects.Add(_menuitem);

@@ -9,19 +9,25 @@ using ProjectHook.GameFrameWork;
 
 namespace ProjectHook
 {
+    /// <summary>
+    /// Used when in a level, keeps track of a race timer
+    /// can see who's in first (who is most to the right)
+    /// </summary>
     public class Race
     {
         private bool _started;
-        public int Timer;
+        public RaceTimer Timer = new RaceTimer();
 
         public void StartRace()
         {
             _started = true;
+            Timer.Start();
         }
 
         public void FinishRace()
         {
             _started = false;
+            Timer.Stop();
         }
 
         public PlayerIndex GetFirstPlace()
@@ -38,7 +44,7 @@ namespace ProjectHook
         public void Update(GameTime gameTime)
         {
             if(_started)
-                Timer++;
+                Timer.Update();
         }
     }
 }

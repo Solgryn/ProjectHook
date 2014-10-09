@@ -27,8 +27,6 @@ namespace ProjectHook.GameFrameWork
             GameObjects = new List<GameObjectBase>();
         }
 
-        
-
 
         //-------------------------------------------------------------------------------------
         // Properties
@@ -40,7 +38,7 @@ namespace ProjectHook.GameFrameWork
         // A list of active game objects
         public List<GameObjectBase> GameObjects { get; set; }
 
-        public Globals.Levels CurrentLevel = Globals.Levels.TitleScreen;
+        public Globals.Levels CurrentLevel = Globals.Levels.None;
         public IMenu CurrentMenu;
 
 
