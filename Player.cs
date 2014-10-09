@@ -276,8 +276,8 @@ namespace ProjectHook
             //Goal
             if (OverlapsTileType(BoundingBox, "goal") != null)
             {
-                Game.GoToMenu(Globals.StageSelect);
                 Game.FinishTime();
+                Game.GoToMenu(Globals.StageSelect);        
             }
 
             #region Animations

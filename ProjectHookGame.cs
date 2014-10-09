@@ -310,7 +310,7 @@ namespace ProjectHook
 
         public override void FinishTime()
         {
-            _timer.FinishTime(CurrentLevel);
+            //_timer.FinishTime(CurrentLevel);
         }
 
         public void CloseCurrentMenu()
