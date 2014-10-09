@@ -23,7 +23,7 @@ namespace ProjectHook.GameFrameWork
             }
         }
 
-        public static int Width = 768;
-        public static int Height = 432;
+        public static int Width = 1280;
+        public static int Height = 720;
     }
 }

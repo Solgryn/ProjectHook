@@ -238,8 +238,20 @@ namespace GrappleRace.GameFrameWork
         {
             foreach (var tile in Collections.Tiles)
             {
-                if (hitbox.Intersects(tile.BoundingBox) && tile.LayerName == layerName)
-                    return true;
+                if (tile.LayerName == layerName)
+                {
+                    if (!tile.IsOutOfFrame(0))
+                    {
+                        var hitboxLocation = new Vector2(hitbox.Location.X + hitbox.Width / 2f,
+                            hitbox.Location.Y + hitbox.Height / 2f);
+                        if (Vector2.Distance(tile.Position, hitboxLocation) < 64) //If the tile is close to the hitbox location
+                        {
+                            if (hitbox.Intersects(tile.BoundingBox))
+                                return true;
+                        }
+                    }
+                }
+                
             }
             return false;
         }
@@ -248,8 +260,12 @@ namespace GrappleRace.GameFrameWork
         {
             foreach (var tile in Collections.Tiles)
             {
-                if (hitbox.Intersects(tile.BoundingBox) && tile.ObjType == type)
-                    return tile;
+                if (tile.ObjType == type)
+                {
+                    if (hitbox.Intersects(tile.BoundingBox))
+                        return tile;
+                }
+                
             }
             return null;
         }

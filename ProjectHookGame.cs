@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using GrappleRace.GameFrameWork;
@@ -27,6 +28,11 @@ namespace ProjectHook
         private bool _drawHitboxes;
         private SpriteFont _font;
 
+        public Race CurrentRace;
+        private TextObject FirstPlace;
+
+        private FontRenderer _fontRenderer;
+
         private Timer _timer;
         private TextObject _record;
 
@@ -46,6 +52,7 @@ namespace ProjectHook
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
 
             //Change screen size
 
@@ -67,6 +74,12 @@ namespace ProjectHook
             Globals.TitleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
             Globals.StageSelect = new StageSelect(this, _font, new Vector2(0, 0));
 
+            //_graphics.IsFullScreen = true;
+            //_graphics.ApplyChanges();
+
+            _font = Content.Load<SpriteFont>("MonoLog");
+            Fonts.Add("thefont", _font);
+
             base.Initialize();
         }
 
@@ -78,21 +91,22 @@ namespace ProjectHook
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            var fishTx = Content.Load<Texture2D>("fish");
-            
-            _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
-            _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
 
-            _font = Content.Load<SpriteFont>("MonoLog");
+            if (CurrentLevel != null)
+            {
+                var fishTx = Content.Load<Texture2D>("fish");
+                _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
+                _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
+            }
 
             Camera.Position = Vector2.Zero;
 
-            _timer = new Timer(this, _font, new Vector2(10, 10));
+            //_timer = new Timer(this, _font, new Vector2(10, 10));
 
             //Set start levels and menus
             if (!initialized)
             {
-                CurrentLevel = Globals.Levels.Level1;
+                CurrentLevel = 0;
                 CurrentMenu = Globals.TitleScreen;
                 initialized = true;
             }
@@ -113,12 +127,20 @@ namespace ProjectHook
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
 
-                _record = new TextObject(this, _font, new Vector2(700, 10), _timer.ShowLevelRecord(CurrentLevel));
-                GameObjects.Add(_record);
+                var fontFilePath = Path.Combine(Content.RootDirectory, "bitmapfont.fnt");
+                var fontFile = FontLoader.Load(fontFilePath);
+                var fontTexture = Content.Load<Texture2D>("bitmapfont_0.png");
+
+                _fontRenderer = new FontRenderer(fontFile, fontTexture);
+                _fontRenderer.Text = "hej";
+                Collections.Fonts.Add(_fontRenderer);
+
+                FirstPlace = new TextObject(this, _font, new Vector2(10, 10), "Who's in first place?");
+                GameObjects.Add(FirstPlace);
+                //_record = new TextObject(this, _font, new Vector2(700, 10), _timer.ShowLevelRecord(CurrentLevel));
+                //GameObjects.Add(_record);
                 
-                GameObjects.Add(_timer);
-               
-                GameObjects.Add(_mapObject);
+                //GameObjects.Add(_timer);
             }
         }
 
@@ -140,14 +162,13 @@ namespace ProjectHook
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-
             //Set camera position
             Camera.Position.X =
                 Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f);
             //Set x position to average of all players
-            Camera.Position.Y = 175;
+            Camera.Position.Y = 0;
 
-            Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
+            Camera.Position.X = Math.Max(Camera.Position.X, 0); //Limit camera
 
             //Toggle drawing of hitboxes
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && _canPressKey)
@@ -159,7 +180,7 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyUp(Keys.F1))
                 _canPressKey = true;
 
-
+            //TODO add controller buttons
             //Menu controls
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter && CurrentMenu != null)
             {
@@ -191,13 +212,17 @@ namespace ProjectHook
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
         
-            //if(!_pauseMenu.IsMenuOpen)
-            //{ 
-                for (var i = 0; i < GameObjects.Count; i++)
-                {
-                    GameObjects[i].Update(gameTime);
-                }
-            //}
+            for (var i = 0; i < GameObjects.Count; i++)
+            {
+                GameObjects[i].Update(gameTime);
+            }
+
+            //In a level, racing
+            if (CurrentLevel != null && CurrentRace != null)
+            {
+                CurrentRace.Update(gameTime);
+                FirstPlace.Text = "Player " + CurrentRace.GetFirstPlace() + " is in the lead!";
+            }
 
             base.Update(gameTime);
         }
@@ -221,6 +246,12 @@ namespace ProjectHook
                 var gameObject = (SpriteObject) gameObjectBase;
                 gameObject.Draw(gameTime, _spriteBatch);
             }
+
+            foreach (var fontRenderer in Collections.Fonts)
+            {
+                fontRenderer.DrawText(_spriteBatch, 50, 50);
+            }
+            
 
 
             //Draw hitboxes
@@ -263,6 +294,10 @@ namespace ProjectHook
             UnloadContent();
             CurrentLevel = level;
             LoadContent();
+
+            //Start new race
+            CurrentRace = new Race();
+            CurrentRace.StartRace();
         }
 
         public override void GoToMenu(IMenu menu)

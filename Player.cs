@@ -9,17 +9,19 @@ namespace ProjectHook
 {
     public sealed class Player : SpriteObject
     {
-        private readonly PlayerIndex _playerIndex;
+        public readonly PlayerIndex PlayerIndex;
         private readonly int _playerIndexInt;
+        private TextObject IndexText;
 
         public Vector2 Velocity = new Vector2(0, 0);
         public float Acceleration = 0.6f;
         public float Deacceleration = 0.4f;
         public float MaxSpeed = 3.5f;
+        private float _startMaxSpeed;
         public float JumpStrength = -10f;
         public bool OnGround = false;
         public bool CanJump = true;
-        public int Ammo = 1;
+        public int Ammo = 3;
 
         private double _animationCounter;
         private double _animationSpeed;
@@ -46,6 +48,8 @@ namespace ProjectHook
         private bool _grappleKey;
         private readonly Cooldown _grappleCooldown = new Cooldown(40);
 
+        private readonly Cooldown _slowDebuff = new Cooldown(100);
+
         //Animations
         public Animation CurrentAnimation = Animations.Idle;
 
@@ -60,12 +64,13 @@ namespace ProjectHook
             : base(game, position, texture)
         {
             SpriteTexture = texture;
-            _playerIndex = playerIndex;
+            PlayerIndex = playerIndex;
+            _startMaxSpeed = MaxSpeed;
 
             OriginX = 32;
             OriginY = 32;
 
-            switch (_playerIndex)
+            switch (PlayerIndex)
             {
                 case PlayerIndex.One:
                     _playerIndexInt = 0;
@@ -78,13 +83,18 @@ namespace ProjectHook
                     break;
             }
             BoundingBox = new Rectangle(16, 16, 32, 48);
+
+            IndexText = new TextObject(Game, Game.Fonts["thefont"], new Vector2(0, 0));
+            IndexText.Text = playerIndex.ToString();
+            Game.GameObjects.Add(IndexText);
         }
 
         public override void Update(GameTime gameTime)
         {
+            MaxSpeed = _startMaxSpeed;
             OnGround = false;
 
-            #region Cooldowns
+            #region Cooldowns and Debuffs
             //Manage cooldowns
             _grappleCooldown.Decrement();
             //Can't control for x frames
@@ -97,17 +107,24 @@ namespace ProjectHook
             {
                 CanControl = true;
             }
+
+            //Slow debuff
+            if (!_slowDebuff.IsOff())
+            {
+                MaxSpeed = _startMaxSpeed * 0.75f;
+                _slowDebuff.Decrement();
+            }
                 
             #endregion
 
             #region Controls
             //Get X control
-            var controlX = Globals.GetControl(_playerIndex).X;
+            var controlX = Globals.GetControl(PlayerIndex).X;
 
             //Get buttons
-            if (GamePad.GetState(_playerIndex).IsConnected)
+            if (GamePad.GetState(PlayerIndex).IsConnected)
             {
-                var gamepadState = GamePad.GetState(_playerIndex);
+                var gamepadState = GamePad.GetState(PlayerIndex);
                 _jumpKey = gamepadState.IsButtonDown(Buttons.A);
                 _grappleKey = gamepadState.IsButtonDown(Buttons.B);
             }
@@ -242,6 +259,9 @@ namespace ProjectHook
             }
             #endregion
 
+            //Display font above head
+            IndexText.Position = new Vector2(PositionX-Camera.Position.X-24, PositionY - 48);
+
             if (IsOutOfFrame(256) || PositionX + 16 < Camera.Position.X || OverlapsTileLayer(BoundingBox, Globals.LAYER_BAD))
                 Die();
             if (OverlapsTileLayer(BoundingBox, Globals.LAYER_GOAL))
@@ -334,6 +354,7 @@ namespace ProjectHook
         {
             Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y+100);
             Velocity = Vector2.Zero;
+            _slowDebuff.GoOnCooldown();
         }
     }
 }

@@ -43,7 +43,7 @@ namespace ProjectHook.Menu
                 Game.Content.Load<Texture2D>(Folder + "Stage3")
             };
 
-            var title = new SpriteObject(_game, new Vector2(32, 175), bgTex); //ATM, I don't know why these magic numbers work to center the image (35, 175)
+            var title = new SpriteObject(_game, new Vector2(0, 0), bgTex);
 
             Game.GameObjects.Add(title);
 

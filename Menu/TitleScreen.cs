@@ -43,7 +43,7 @@ namespace ProjectHook.Menu
             IsMenuOpen = true;
             var titleTex = Game.Content.Load<Texture2D>("TitleScreen/Background");
 
-            var _title = new SpriteObject(_game, new Vector2(32, 175), titleTex); //ATM, I don't know why these magic numbers work to center the image (35, 175)
+            var _title = new SpriteObject(_game, new Vector2(0, 0), titleTex);
 
             Game.GameObjects.Add(_title);
             for (var i = 0; i < _menuItems.Count; i++)
