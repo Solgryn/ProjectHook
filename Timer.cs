@@ -61,21 +61,11 @@ namespace ProjectHook
                 Text = "0" + _minutes + ":" + _seconds + ":" + _miliseconds;
         }
 
-        internal void FinishTime(Globals.Levels CurrentLevel)
-        {
-            if (records.ContainsKey(CurrentLevel))
-            {
-                records[CurrentLevel] = Text;
-            }
-            records.Add(CurrentLevel, Text);
-            Text = "";
-        }
 
-        internal string ShowLevelRecord(Globals.Levels Level)
+
+        internal void ResetTimer()
         {
-            if (records.ContainsKey(Level))
-                return records[Level];
-            return "0";
+            Text = "";
         }
     }
 }

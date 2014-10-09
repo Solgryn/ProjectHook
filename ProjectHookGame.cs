@@ -113,7 +113,12 @@ namespace ProjectHook
                 _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx");
                 _mapObject = new MapObject(this, new Vector2(0, 0), _tiles, _level);
 
-                _record = new TextObject(this, _font, new Vector2(700, 10), _timer.ShowLevelRecord(CurrentLevel));
+                if(!Collections.Records.ContainsKey(CurrentLevel))
+                _record = new TextObject(this, _font, new Vector2(700, 10), "");
+                else
+                _record = new TextObject(this, _font, new Vector2(700, 10), Collections.Records[CurrentLevel]);
+
+
                 GameObjects.Add(_record);
                 
                 GameObjects.Add(_timer);
@@ -275,7 +280,8 @@ namespace ProjectHook
 
         public override void FinishTime()
         {
-            _timer.FinishTime(CurrentLevel);
+            Collections.Records.Add(CurrentLevel, _timer.Text);
+            _timer.ResetTimer();
         }
 
         public void CloseCurrentMenu()
