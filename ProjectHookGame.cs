@@ -28,11 +28,10 @@ namespace ProjectHook
         private bool _drawHitboxes;
         private SpriteFont _font;
 
-        public Race CurrentRace;
         private TextObject FirstPlace;
 
-        private FontRenderer RaceTimerText;
-        private FontRenderer FirstPlaceText;
+        private FontRenderer _raceTimerText;
+        private FontRenderer _firstPlaceText;
 
         private GraphicsDeviceManager _graphics;
         private TiledMap _level;
@@ -71,6 +70,7 @@ namespace ProjectHook
             //Setup menus
             Globals.TitleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
             Globals.StageSelect = new StageSelect(this, _font, new Vector2(0, 0));
+            Globals.ResultScreen = new Results(this, _font, new Vector2(0, 0));
 
             CurrentLevel = Globals.Levels.None;
 
@@ -128,10 +128,10 @@ namespace ProjectHook
                 _mapObject = new MapObject(this, new Vector2(-64, 0), _tiles, _level); //Adds the level tiles to the global collection
 
                 //Make bitmap texts
-                RaceTimerText = NewFont("bitmapfont", new Vector2(Camera.Width/2f, 8), FontRenderer.FontDisplays.Center);
-                Collections.Fonts.Add(RaceTimerText);
-                FirstPlaceText = NewFont("bitmapfont", new Vector2(0, 48), FontRenderer.FontDisplays.Center);
-                Collections.Fonts.Add(FirstPlaceText);
+                _raceTimerText = Content.NewFont("bitmapfont", new Vector2(Camera.Width/2f, 8), FontRenderer.FontDisplays.Center);
+                Collections.Fonts.Add(_raceTimerText);
+                _firstPlaceText = Content.NewFont("bitmapfont", new Vector2(0, 48), FontRenderer.FontDisplays.Center);
+                Collections.Fonts.Add(_firstPlaceText);
             }
         }
 
@@ -141,7 +141,6 @@ namespace ProjectHook
         /// </summary>
         protected override void UnloadContent()
         {
-            CurrentRace = null;
             GameObjects.Clear();
             Collections.Players.Clear();
             Collections.Tiles.Clear();
@@ -204,6 +203,9 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyDown(Keys.F3))
                 GoToLevel(Globals.Levels.Level2);
 
+            if (Keyboard.GetState().IsKeyDown(Keys.F4))
+                GoToMenu(Globals.ResultScreen);
+
             //Quit game
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -215,12 +217,13 @@ namespace ProjectHook
             }
 
             //If in a level and racing, display the timer and who's in the lead
-            if (CurrentLevel != null && CurrentRace != null)
+            if (CurrentLevel != null && CurrentRace != null && CurrentRace.IsStarted)
             {
+                CurrentRace.CalcFirstPlace();
                 CurrentRace.Update(gameTime);
-                FirstPlaceText.Text = "Player " + CurrentRace.GetFirstPlace() + " is in the lead!\n";
-                FirstPlaceText.Position.X = Camera.Width/2f;
-                RaceTimerText.Text = CurrentRace.Timer.GetAsText();
+                _firstPlaceText.Text = "Player " + CurrentRace.FirstPlace + " is in the lead!\n";
+                _firstPlaceText.Position.X = Camera.Width/2f;
+                _raceTimerText.Text = CurrentRace.Timer.GetAsText();
             }
 
             base.Update(gameTime);
@@ -315,14 +318,6 @@ namespace ProjectHook
             CurrentMenu = null;
         }
 
-        //Add a new bitmap text, uses code from http://www.craftworkgames.com/blog/tutorial-bmfont-rendering-with-monogame/
-        public FontRenderer NewFont(string name, Vector2 position, FontRenderer.FontDisplays fontDisplay)
-        {
-            var fontFilePath = Path.Combine(Content.RootDirectory, name + ".fnt");
-            var fontFile = FontLoader.Load(fontFilePath);
-            var fontTexture = Content.Load<Texture2D>(name + "_0.png");
-
-            return new FontRenderer(fontFile, fontTexture, position, fontDisplay);
-        }
+        
     }
 }

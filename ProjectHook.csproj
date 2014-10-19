@@ -45,6 +45,7 @@
     <Compile Include="Globals.cs" />
     <Compile Include="Menu\Menu.cs" />
     <Compile Include="Menu\IMenu.cs" />
+    <Compile Include="Menu\Results.cs" />
     <Compile Include="Menu\StageSelect.cs" />
     <Compile Include="Menu\TitleScreen.cs" />
     <Compile Include="ProjectHookGame.cs" />
@@ -102,6 +103,9 @@
     <Content Include="Content\menubg.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Results\Background.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\StageSelect\Background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -142,6 +146,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Levels\Level2.tmx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Levels\Level3.tmx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

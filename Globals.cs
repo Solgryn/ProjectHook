@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectHook.GameFrameWork;
 using ProjectHook.Menu;
 
 namespace ProjectHook
@@ -18,6 +21,7 @@ namespace ProjectHook
 
         public static TitleScreen TitleScreen;
         public static StageSelect StageSelect;
+        public static Results ResultScreen;
 
         public enum Levels
         {
@@ -28,6 +32,8 @@ namespace ProjectHook
             Level1,
             [Description("Level2")]
             Level2,
+            [Description("Level3")]
+            Level3,
             StageSelect
         }
 

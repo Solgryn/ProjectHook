@@ -15,35 +15,35 @@ namespace ProjectHook
     /// </summary>
     public class Race
     {
-        private bool _started;
+        public bool IsStarted;
         public RaceTimer Timer = new RaceTimer();
+        public PlayerIndex FirstPlace;
 
         public void StartRace()
         {
-            _started = true;
+            IsStarted = true;
             Timer.Start();
         }
 
         public void FinishRace()
         {
-            _started = false;
+            IsStarted = false;
             Timer.Stop();
         }
 
-        public PlayerIndex GetFirstPlace()
+        public void CalcFirstPlace()
         {
             var maxPosition = Collections.Players.Max(p => p.PositionX);
             foreach (var player in Collections.Players)
             {
-                if(player.PositionX >= maxPosition)
-                    return player.PlayerIndex;
+                if (player.PositionX >= maxPosition)
+                    FirstPlace = player.PlayerIndex;
             }
-            return default(PlayerIndex);
         }
 
         public void Update(GameTime gameTime)
         {
-            if(_started)
+            if (IsStarted)
                 Timer.Update();
         }
     }

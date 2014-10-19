@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using GrappleRace.GameFrameWork;
@@ -10,10 +9,10 @@ using ProjectHook.GameFrameWork;
 
 namespace ProjectHook.Menu
 {
-    public class StageSelect : Menu<SpriteObject>, IMenu
+    class ResultScreen : Menu<SpriteObject>, IMenu
     {
-        private const string Folder = "StageSelect/";
-        
+        private const string Folder = "ResultScreen/";
+
         public enum States
         {
             Race,
@@ -23,7 +22,8 @@ namespace ProjectHook.Menu
 
         public States MenuState { get; set; }
 
-        public StageSelect(GameHost game, SpriteFont font, Vector2 position) : base(game, font, position)
+        public ResultScreen(GameHost game, SpriteFont font, Vector2 position)
+            : base(game, font, position)
         {
             _font = font;
             _game = game;
@@ -43,7 +43,7 @@ namespace ProjectHook.Menu
                 Game.Content.Load<Texture2D>(Folder + "Stage3")
             };
 
-            var title = new SpriteObject(_game, new Vector2(0, 0), bgTex);
+            var title = new SpriteObject(_game, new Vector2(32, 175), bgTex); //ATM, I don't know why these magic numbers work to center the image (35, 175)
 
             Game.GameObjects.Add(title);
 
@@ -80,7 +80,7 @@ namespace ProjectHook.Menu
                     Game.GoToLevel(Globals.Levels.Level2);
                     break;
                 case Folder + "Stage3":
-                    Game.GoToLevel(Globals.Levels.Level3);
+                    Game.GoToLevel(Globals.Levels.Level2); //TODO
                     break;
             }
         }

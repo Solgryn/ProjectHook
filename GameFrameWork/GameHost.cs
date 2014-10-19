@@ -40,6 +40,7 @@ namespace ProjectHook.GameFrameWork
 
         public Globals.Levels CurrentLevel = Globals.Levels.None;
         public IMenu CurrentMenu;
+        public Race CurrentRace;
 
 
         //-------------------------------------------------------------------------------------
@@ -167,11 +168,6 @@ namespace ProjectHook.GameFrameWork
         }
 
         public virtual void GoToMenu(IMenu menu)
-        {
-
-        }
-
-        public virtual void FinishTime()
         {
 
         }
