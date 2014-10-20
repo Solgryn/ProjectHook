@@ -51,7 +51,10 @@ namespace ProjectHook
         private readonly Cooldown _grappleCooldown = new Cooldown(40);
 
         //Debuffs
-        private readonly Cooldown _slowDebuff = new Cooldown(100);
+        private readonly Cooldown _slowDebuff = new Cooldown(150);
+
+        //Buffs
+        private readonly Cooldown _speedBuff = new Cooldown(100);
 
         //Animations
         public Animation CurrentAnimation = Animations.Idle;
@@ -115,8 +118,15 @@ namespace ProjectHook
             //Slow debuff
             if (!_slowDebuff.IsOff())
             {
-                MaxSpeed = _startMaxSpeed * 0.75f;
+                MaxSpeed = _startMaxSpeed * 0.6f; //Players are slower
                 _slowDebuff.Decrement();
+            }
+
+            //Speed buff
+            if (!_speedBuff.IsOff())
+            {
+                MaxSpeed = _startMaxSpeed * 1.4f; //Players are faster
+                _speedBuff.Decrement();
             }
                 
             #endregion
@@ -284,6 +294,14 @@ namespace ProjectHook
                 Ammo++;
             }
 
+            //Get speedboost
+            var speedCrate = OverlapsTileType(BoundingBox, "speed"); //Check if there's an ammo crate where you are
+            if (speedCrate != null) //If there is, get ammo and destroy the crate
+            {
+                Collections.Tiles.Remove(speedCrate);
+                _speedBuff.GoOnCooldown();
+            }
+
             //Goal
             if (OverlapsTileType(BoundingBox, "goal") != null)
             {
@@ -363,7 +381,8 @@ namespace ProjectHook
         {
             Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y+100);
             Velocity = Vector2.Zero;
-            _slowDebuff.GoOnCooldown();
+            _slowDebuff.GoOnCooldown(); //Add slow debuff
+            _speedBuff.Reset(); //Remove speed buff
         }
     }
 }
