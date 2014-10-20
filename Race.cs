@@ -17,12 +17,12 @@ namespace ProjectHook
     {
         public bool IsStarted;
         public RaceTimer Timer = new RaceTimer();
+        public RaceTimer CountDown;
         public PlayerIndex FirstPlace;
 
         public void StartRace()
         {
-            IsStarted = true;
-            Timer.Start();
+            CountDown = new RaceTimer(0, 3); //Start countdown at 3
         }
 
         public void FinishRace()
@@ -43,6 +43,12 @@ namespace ProjectHook
 
         public void Update(GameTime gameTime)
         {
+            if (!CountDown.CountDownUpdate())
+            {
+                IsStarted = true;
+                Timer.Start();
+            }
+                
             if (IsStarted)
                 Timer.Update();
         }

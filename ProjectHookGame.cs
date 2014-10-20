@@ -155,8 +155,8 @@ namespace ProjectHook
             {
                 var fishTx = Content.Load<Texture2D>("fish");
 
-                _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
-                _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
+                _player1 = new Player(this, new Vector2(185, 150), fishTx, PlayerIndex.One);
+                _player2 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.Two);
                 Collections.Players.Add(_player1);
                 Collections.Players.Add(_player2);
             }
@@ -264,13 +264,26 @@ namespace ProjectHook
             }
 
             //If in a level and racing, display the timer and who's in the lead
-            if (CurrentLevel != null && CurrentRace != null && CurrentRace.IsStarted)
+            if (CurrentLevel != Globals.Levels.None && CurrentRace != null)
             {
-                CurrentRace.CalcFirstPlace();
+                Debug.WriteLine(CurrentRace.CountDown.GetAsText());
                 CurrentRace.Update(gameTime);
-                _firstPlaceText.Text = "Player " + CurrentRace.FirstPlace + " is in the lead!\n";
-                _firstPlaceText.Position.X = Camera.Width/2f;
-                _raceTimerText.Text = CurrentRace.Timer.GetAsText();
+                //Race hasnt started yet
+                if (!CurrentRace.IsStarted)
+                {
+                    _raceTimerText.Text = CurrentRace.CountDown.GetAsText();
+                    foreach (var player in Collections.Players)
+                    {
+                        player.CantControlFor = 10; //Cant control until race has started
+                    }
+                }
+                else
+                {
+                    CurrentRace.CalcFirstPlace();
+                    _firstPlaceText.Text = "Player " + CurrentRace.FirstPlace + " is in the lead!\n";
+                    _firstPlaceText.Position.X = Camera.Width / 2f;
+                    _raceTimerText.Text = CurrentRace.Timer.GetAsText();
+                }
             }
 
             base.Update(gameTime);

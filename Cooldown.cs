@@ -1,7 +1,7 @@
 ﻿
 namespace ProjectHook
 {
-    class Cooldown
+    public class Cooldown
     {
         public int Max;
         public int Count;

@@ -19,6 +19,28 @@ namespace ProjectHook
         private int _seconds;
         private int _miliseconds;
 
+        public RaceTimer()
+        {
+        }
+
+        public RaceTimer(int minutes)
+        {
+            _minutes = minutes;
+        }
+
+        public RaceTimer(int minutes, int seconds)
+        {
+            _minutes = minutes;
+            _seconds = seconds;
+        }
+
+        public RaceTimer(int minutes, int seconds, int milliseconds)
+        {
+            _minutes = minutes;
+            _seconds = seconds;
+            _miliseconds = milliseconds;
+        }
+
         public void Start()
         {
             running = true;
@@ -44,6 +66,26 @@ namespace ProjectHook
                 _minutes++;
                 _seconds = 0;
            }
+        }
+
+        //returns true if countdown is still going
+        public bool CountDownUpdate()
+        {
+            if (_miliseconds == 0 && _seconds == 0 && _minutes == 0) return false;
+
+            
+            if (_miliseconds == 0 && _seconds > 0)
+            {
+                _seconds--;
+                _miliseconds = 60;
+            }
+            _miliseconds--;
+            if (_seconds == 0 && _minutes > 0)
+            {
+                _minutes--;
+                _seconds = 60;
+            }
+            return true;
         }
 
         public string GetAsText()

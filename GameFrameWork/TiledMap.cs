@@ -68,7 +68,6 @@ namespace LevelReader.GameFrameWork
         #region Constructor
         public TiledMap(String xmlFile)
         {
-            Debug.WriteLine(xmlFile);
             try
             {
                 var reader = XmlReader.Create(xmlFile);
