@@ -7,6 +7,11 @@
     <property name="type" value="ammo"/>
    </properties>
   </tile>
+  <tile id="7">
+   <properties>
+    <property name="type" value="speed"/>
+   </properties>
+  </tile>
   <tile id="14">
    <properties>
     <property name="type" value="goal"/>

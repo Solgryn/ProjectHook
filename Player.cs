@@ -54,7 +54,7 @@ namespace ProjectHook
         private readonly Cooldown _slowDebuff = new Cooldown(150);
 
         //Buffs
-        private readonly Cooldown _speedBuff = new Cooldown(100);
+        private readonly Cooldown _speedBuff = new Cooldown(150);
 
         //Animations
         public Animation CurrentAnimation = Animations.Idle;
@@ -175,6 +175,7 @@ namespace ProjectHook
             //Jump
             if (_jumpKey && CanJump && CanControl)
             {
+                Game.PlaySound(Sounds.Jump);
                 Velocity.Y = JumpStrength;
                 CanJump = false;
             }
@@ -290,6 +291,7 @@ namespace ProjectHook
             var ammoCrate = OverlapsTileType(BoundingBox, "ammo"); //Check if there's an ammo crate where you are
             if (ammoCrate != null) //If there is, get ammo and destroy the crate
             {
+                Game.PlaySound(Sounds.Powerup);
                 Collections.Tiles.Remove(ammoCrate);
                 Ammo++;
             }
@@ -298,6 +300,7 @@ namespace ProjectHook
             var speedCrate = OverlapsTileType(BoundingBox, "speed"); //Check if there's an ammo crate where you are
             if (speedCrate != null) //If there is, get ammo and destroy the crate
             {
+                Game.PlaySound(Sounds.Powerup);
                 Collections.Tiles.Remove(speedCrate);
                 _speedBuff.GoOnCooldown();
             }
@@ -344,6 +347,7 @@ namespace ProjectHook
         public void ThrowHook()
         {
             if(Ammo == 0) return;
+            Game.PlaySound(Sounds.Hook);
             var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), this, 15);
             Game.GameObjects.Add(hook);
             Ammo--;
@@ -369,6 +373,7 @@ namespace ProjectHook
         //Hook hits tile
         public void HookHit(Hook hook)
         {
+            Game.PlaySound(Sounds.Pull);
             //Set velocity of player 
             Velocity.Y = hook.Pull.Y * 2;
             Velocity.X = (hook.Pull.X * hook.GetDirection()) * 1.3f;
@@ -379,6 +384,7 @@ namespace ProjectHook
 
         public void Die()
         {
+            Game.PlaySound(Sounds.Died);
             Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y+100);
             Velocity = Vector2.Zero;
             _slowDebuff.GoOnCooldown(); //Add slow debuff

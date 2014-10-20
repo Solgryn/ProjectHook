@@ -55,9 +55,9 @@ namespace ProjectHook
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
+            Window.Title = "Sea Sprint!";
 
             //Change screen size
-
             _graphics.PreferredBackBufferWidth = Camera.Width;
             _graphics.PreferredBackBufferHeight = Camera.Height;
         }
@@ -75,11 +75,34 @@ namespace ProjectHook
             Sounds.Music2 = Content.Load<SoundEffect>("Music/Stage2.wav").CreateInstance();
             Sounds.Music3 = Content.Load<SoundEffect>("Music/Stage3.wav").CreateInstance();
             Sounds.ResultScreen = Content.Load<SoundEffect>("Music/ResultScreen.wav").CreateInstance();
+
+            //Sound effects
+            Sounds.Died = Content.Load<SoundEffect>("Sounds/died.wav").CreateInstance();
+            Sounds.Jump = Content.Load<SoundEffect>("Sounds/jump.wav").CreateInstance();
+            Sounds.Powerup = Content.Load<SoundEffect>("Sounds/powerup.wav").CreateInstance();
+            Sounds.Select = Content.Load<SoundEffect>("Sounds/select.wav").CreateInstance();
+            Sounds.Hook = Content.Load<SoundEffect>("Sounds/hook.wav").CreateInstance();
+            Sounds.Pull = Content.Load<SoundEffect>("Sounds/pull.wav").CreateInstance();
+
             //Add music to collection (So that all music can be stopped)
-            Collections.Music.Add(Sounds.Music1);
-            Collections.Music.Add(Sounds.Music2);
-            Collections.Music.Add(Sounds.Music3);
-            Collections.Music.Add(Sounds.ResultScreen);
+            Collections.Music.AddRange(new[]
+            {
+                Sounds.Music1,
+                Sounds.Music2,
+                Sounds.Music3,
+                Sounds.ResultScreen
+            });
+
+            //Add sound effects to collection
+            Collections.SoundEffects.AddRange(new[]
+            {
+                Sounds.Died,
+                Sounds.Jump,
+                Sounds.Powerup,
+                Sounds.Select,
+                Sounds.Hook,
+                Sounds.Pull
+            });
 
             _font = Content.Load<SpriteFont>("MonoLog");
 
@@ -90,6 +113,7 @@ namespace ProjectHook
 
             CurrentLevel = Globals.Levels.None;
 
+            //TODO add options menu to toggle this as well as music / sound volume
             //Set to full screen
             //_graphics.IsFullScreen = true;
             //_graphics.ApplyChanges();
@@ -219,7 +243,7 @@ namespace ProjectHook
                 //Set x position to average of all players
                 Camera.Position.Y = 0;
 
-                Camera.Position.X = Math.Max(Camera.Position.X, 0); //Limit camera
+                Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
             }
             
             //Toggle drawing of hitboxes
@@ -392,8 +416,16 @@ namespace ProjectHook
                 if(!track.Equals(music))
                     track.Stop();
             }
+            music.Volume = Sounds.MusicVolume;
             music.IsLooped = doLoop; //Should the music loop or not
             music.Play(); //Starts the music
+        }
+
+        public override void PlaySound(SoundEffectInstance sound, bool doLoop = false)
+        {
+            sound.Volume = Sounds.SoundEffectVolume;
+            sound.IsLooped = doLoop; //Should the music loop or not
+            sound.Play(); //Starts the music
         }
     }
 }

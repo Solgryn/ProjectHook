@@ -10,5 +10,6 @@ namespace ProjectHook
         public static List<Tile> Tiles = new List<Tile>();
         public static List<FontRenderer> Fonts = new List<FontRenderer>();
         public static List<SoundEffectInstance> Music = new List<SoundEffectInstance>();
+        public static List<SoundEffectInstance> SoundEffects = new List<SoundEffectInstance>();
     }
 }

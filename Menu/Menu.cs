@@ -35,9 +35,16 @@ namespace ProjectHook.Menu
             //move selection
             if (Math.Abs(Control) > 0.5f && SelectCooldown.IsOff())
             {
-                Selection += Convert.ToInt16(Math.Round(Control)); //Returns either -1 or 1
-                Selection = MathHelper.Clamp(Selection, 0, Items.Count - 1); //Adds the control to the selection, and keeps it within the menu range
-                SelectCooldown.GoOnCooldown();
+                var direction = Convert.ToInt16(Math.Round(Control)); //Returns either -1 or 1
+
+                if(direction > 0 && Selection < Items.Count - 1 ||
+                   direction < 0 && Selection > 0) //Checks if selection is within boundaries
+                {
+                    Game.PlaySound(Sounds.Select);
+                    Selection += direction; //Returns either -1 or 1
+                    Selection = MathHelper.Clamp(Selection, 0, Items.Count - 1); //Adds the control to the selection, and keeps it within the menu range
+                    SelectCooldown.GoOnCooldown();
+                }
             }
 
             SelectCooldown.Decrement();
