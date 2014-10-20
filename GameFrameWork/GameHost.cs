@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using GrappleRace.GameFrameWork;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ProjectHook.GameFrameWork
@@ -38,6 +39,7 @@ namespace ProjectHook.GameFrameWork
         // A list of active game objects
         public List<GameObjectBase> GameObjects { get; set; }
 
+        public Globals.Levels PreviousLevel = Globals.Levels.None;
         public Globals.Levels CurrentLevel = Globals.Levels.None;
         public IMenu CurrentMenu;
         public Race CurrentRace;
@@ -168,6 +170,11 @@ namespace ProjectHook.GameFrameWork
         }
 
         public virtual void GoToMenu(IMenu menu)
+        {
+
+        }
+
+        public virtual void PlayMusic(SoundEffectInstance music, bool doLoop = false)
         {
 
         }

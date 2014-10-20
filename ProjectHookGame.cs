@@ -9,8 +9,11 @@ using System.Linq.Expressions;
 using GrappleRace.GameFrameWork;
 using LevelReader.GameFrameWork;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using ProjectHook.GameFrameWork;
 using ProjectHook.Menu;
 
@@ -27,6 +30,8 @@ namespace ProjectHook
         
         private bool _drawHitboxes;
         private SpriteFont _font;
+
+        private SpriteObject _backgroundImage;
 
         private TextObject FirstPlace;
 
@@ -65,12 +70,23 @@ namespace ProjectHook
         /// </summary>
         protected override void Initialize()
         {
+            //Music
+            Sounds.Music1 = Content.Load<SoundEffect>("Music/Stage1.wav").CreateInstance();
+            Sounds.Music2 = Content.Load<SoundEffect>("Music/Stage2.wav").CreateInstance();
+            Sounds.Music3 = Content.Load<SoundEffect>("Music/Stage3.wav").CreateInstance();
+            Sounds.ResultScreen = Content.Load<SoundEffect>("Music/ResultScreen.wav").CreateInstance();
+            //Add music to collection (So that all music can be stopped)
+            Collections.Music.Add(Sounds.Music1);
+            Collections.Music.Add(Sounds.Music2);
+            Collections.Music.Add(Sounds.Music3);
+            Collections.Music.Add(Sounds.ResultScreen);
+
             _font = Content.Load<SpriteFont>("MonoLog");
 
             //Setup menus
             Globals.TitleScreen = new TitleScreen(this, _font, new Vector2(0, 0));
             Globals.StageSelect = new StageSelect(this, _font, new Vector2(0, 0));
-            Globals.ResultScreen = new Results(this, _font, new Vector2(0, 0));
+            Globals.ResultScreen = new ResultScreen(this, _font, new Vector2(0, 0));
 
             CurrentLevel = Globals.Levels.None;
 
@@ -90,6 +106,47 @@ namespace ProjectHook
         /// </summary>
         protected override void LoadContent()
         {
+            //Set start levels and menus
+            if (!initialized)
+            {
+                CurrentLevel = 0;
+                CurrentMenu = Globals.TitleScreen;
+                initialized = true;
+            }
+
+            //Play music dependent on which level/menu
+            if (CurrentLevel != Globals.Levels.None)
+            {
+                switch (CurrentLevel)
+                {
+                    case Globals.Levels.Level1:
+                        PlayMusic(Sounds.Music1, true);
+                        break;
+                    case Globals.Levels.Level2:
+                        PlayMusic(Sounds.Music2, true);
+                        break;
+                    case Globals.Levels.Level3:
+                        PlayMusic(Sounds.Music3, true);
+                        break;
+                }
+            }
+            if (CurrentMenu != null)
+            {
+                switch (CurrentMenu.GetName())
+                {
+                    case Globals.Menus.TitleScreen:
+                        PlayMusic(Sounds.Music1, true);
+                        break;
+                    case Globals.Menus.StageSelect:
+                        PlayMusic(Sounds.Music1, true);
+                        break;
+                    case Globals.Menus.ResultScreen:
+                        PlayMusic(Sounds.ResultScreen, true);
+                        break;
+                }
+                
+            }
+
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -97,6 +154,7 @@ namespace ProjectHook
             if (CurrentLevel != Globals.Levels.None)
             {
                 var fishTx = Content.Load<Texture2D>("fish");
+
                 _player1 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.One);
                 _player2 = new Player(this, new Vector2(210, 150), fishTx, PlayerIndex.Two);
                 Collections.Players.Add(_player1);
@@ -106,14 +164,6 @@ namespace ProjectHook
             //Reset camera position
             Camera.Position = Vector2.Zero;
 
-            //Set start levels and menus
-            if (!initialized)
-            {
-                CurrentLevel = 0;
-                CurrentMenu = Globals.TitleScreen;
-                initialized = true;
-            }
-
             //Show menu else show level
             if (CurrentMenu != null)
             {
@@ -121,10 +171,15 @@ namespace ProjectHook
             }
             else
             {
+                //Level background
+                var levelBgTex = Content.Load<Texture2D>("LevelBackground");
+                _backgroundImage = new SpriteObject(this, new Vector2(0, 0), levelBgTex);
+                _backgroundImage.DontFollowCamera = true;
+
                 GameObjects.Add(_player1);
                 GameObjects.Add(_player2); 
                 _tiles = Content.Load<Texture2D>("tiles");
-                _level = new TiledMap("Levels/" + CurrentLevel.ToDescription() + ".tmx"); //Which level to load
+                _level = new TiledMap("Levels/" + CurrentLevel + ".tmx"); //Which level to load
                 _mapObject = new MapObject(this, new Vector2(-64, 0), _tiles, _level); //Adds the level tiles to the global collection
 
                 //Make bitmap texts
@@ -141,6 +196,7 @@ namespace ProjectHook
         /// </summary>
         protected override void UnloadContent()
         {
+            if (CurrentRace != null) CurrentRace.FinishRace();
             GameObjects.Clear();
             Collections.Players.Clear();
             Collections.Tiles.Clear();
@@ -159,7 +215,7 @@ namespace ProjectHook
             {
                 //Set camera position
                 Camera.Position.X =
-                    Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, 0.1f);
+                    Camera.Position.X.SmoothTowards(Collections.Players.Average(player => player.PositionX) - 250, Globals.SMOOTH_MEDIUM);
                 //Set x position to average of all players
                 Camera.Position.Y = 0;
 
@@ -178,7 +234,7 @@ namespace ProjectHook
 
             //TODO add controller buttons
             //Menu controls
-            if (Keyboard.GetState().IsKeyDown(Keys.Enter) && _canPressEnter && CurrentMenu != null)
+            if ((GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A) || Keyboard.GetState().IsKeyDown(Keys.Enter)) && _canPressEnter && CurrentMenu != null)
             {
                 _canPressEnter = false;
                 CurrentMenu.OpenSelection();
@@ -192,19 +248,10 @@ namespace ProjectHook
             if (CurrentMenu != null)
                 CurrentMenu.Update(gameTime);
 
-            //Change levels
+            //TODO remove admin controls
+            //Switch levels (admin control)
             if (Keyboard.GetState().IsKeyDown(Keys.F5))
                 GoToMenu(Globals.TitleScreen);
-
-            //Switch levels (admin control)
-            if (Keyboard.GetState().IsKeyDown(Keys.F2))
-                    GoToLevel(Globals.Levels.Level1);
-
-            if (Keyboard.GetState().IsKeyDown(Keys.F3))
-                GoToLevel(Globals.Levels.Level2);
-
-            if (Keyboard.GetState().IsKeyDown(Keys.F4))
-                GoToMenu(Globals.ResultScreen);
 
             //Quit game
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
@@ -238,6 +285,10 @@ namespace ProjectHook
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
+
+            //Draw background if in level
+            if (CurrentLevel != Globals.Levels.None)
+                _backgroundImage.Draw(gameTime, _spriteBatch);
 
             //Draw tiles
             foreach (var tile in Collections.Tiles)
@@ -292,6 +343,7 @@ namespace ProjectHook
 
         public override void GoToLevel(Globals.Levels level)
         {
+            PreviousLevel = CurrentLevel;
             CloseCurrentMenu();
             UnloadContent();
             CurrentLevel = level;
@@ -304,6 +356,7 @@ namespace ProjectHook
 
         public override void GoToMenu(IMenu menu)
         {
+            PreviousLevel = CurrentLevel;
             CurrentLevel = Globals.Levels.None;
             CloseCurrentMenu();
             CurrentMenu = menu;
@@ -318,6 +371,16 @@ namespace ProjectHook
             CurrentMenu = null;
         }
 
-        
+        public override void PlayMusic(SoundEffectInstance music, bool doLoop = false)
+        {
+            //Stop all tracks that are not the one about to be played
+            foreach (var track in Collections.Music)
+            {
+                if(!track.Equals(music))
+                    track.Stop();
+            }
+            music.IsLooped = doLoop; //Should the music loop or not
+            music.Play(); //Starts the music
+        }
     }
 }

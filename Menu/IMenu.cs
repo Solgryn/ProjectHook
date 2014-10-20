@@ -10,6 +10,7 @@ namespace ProjectHook
 {
     public interface IMenu
     {
+        Globals.Menus GetName();
         void ShowMenu();
         void CloseMenu();
         void Update(GameTime gameTime);

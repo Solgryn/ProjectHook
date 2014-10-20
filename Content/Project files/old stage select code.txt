@@ -1,0 +1,102 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using GrappleRace.GameFrameWork;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ProjectHook.GameFrameWork;
+
+namespace ProjectHook.Menu
+{
+    public class StageSelect : Menu<SpriteObject>, IMenu
+    {
+        private const string Folder = "StageSelect/";
+        
+        public enum States
+        {
+            Race,
+            Options,
+            Exit,
+        }
+
+        public States MenuState { get; set; }
+
+        public StageSelect(GameHost game, SpriteFont font, Vector2 position) : base(game, font, position)
+        {
+            _font = font;
+            _game = game;
+        }
+
+        public void ShowMenu()
+        {
+            Selection = 0;
+
+            //Load textures
+            var bgTex = Game.Content.Load<Texture2D>(Folder + "Background");
+
+            var stages = new List<Texture2D>
+            {
+                Game.Content.Load<Texture2D>(Folder + "Stage1"),
+                Game.Content.Load<Texture2D>(Folder + "Stage2"),
+                Game.Content.Load<Texture2D>(Folder + "Stage3")
+            };
+
+            var title = new SpriteObject(_game, new Vector2(0, 0), bgTex);
+
+            Game.GameObjects.Add(title);
+
+            for (var i = 0; i < stages.Count; i++)
+            {
+                var menuItem = new SpriteObject(_game, new Vector2(0, 0), stages[i])
+                {
+                    SourceRect = new Rectangle(80, 0, 80, 64)
+                };
+
+                float width = menuItem.SourceRect.Width + 8;
+
+                //Place objects
+                var x = Camera.Width / 2f;
+                x -= width * (stages.Count / 2f);
+                x += width * i;
+                var y = Camera.Height / 2f + 150;
+                menuItem.Position = new Vector2(x, y);
+
+                //Add objects
+                Items.Add(menuItem);
+                _game.GameObjects.Add(menuItem);
+            }
+        }
+
+        public void OpenSelection()
+        {
+            switch (Items[Selection].SpriteTexture.Name) //Get texture name
+            {
+                case Folder + "Stage1":
+                    Game.GoToLevel(Globals.Levels.Level1);
+                    break;
+                case Folder + "Stage2":
+                    Game.GoToLevel(Globals.Levels.Level2);
+                    break;
+                case Folder + "Stage3":
+                    Game.GoToLevel(Globals.Levels.Level3);
+                    break;
+            }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            Control = Globals.GetControl(PlayerIndex.One).X; //Get control
+
+            SelectionUpdate(); //Update Selection variable
+
+            foreach (var item in Items)
+            {
+                item.SourceRect = new Rectangle(0, 0, 80, 64); //Reset all sprites
+            }
+
+            Items[Selection].SourceRect = new Rectangle(80, 0, 80, 64); //Change selected item sprite
+        }
+    }
+}

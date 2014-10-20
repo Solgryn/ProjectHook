@@ -21,6 +21,7 @@ namespace GrappleRace.GameFrameWork
             ScaleY = 1;
             SpriteColor = Color.White;
             spriteEffects = SpriteEffects.None;
+            DontFollowCamera = false;
         }
 
         public SpriteObject(GameHost game, Vector2 position)
@@ -28,6 +29,7 @@ namespace GrappleRace.GameFrameWork
         {
             // Store the provided position
             Position = position;
+            DontFollowCamera = false;
         }
 
         public SpriteObject(GameHost game, Vector2 position, Texture2D texture)
@@ -35,10 +37,16 @@ namespace GrappleRace.GameFrameWork
         {
             // Store the provided texture
             SpriteTexture = texture;
+            DontFollowCamera = false;
         }
 
         //-------------------------------------------------------------------------------------
         // Properties
+
+        /// <summary>
+        /// Makes the object not scroll with the camera
+        /// </summary>
+        public virtual bool DontFollowCamera { get; set; }
 
         /// <summary>
         /// A reference to the default texture used by this sprite
@@ -208,10 +216,18 @@ namespace GrappleRace.GameFrameWork
             // Do we have a texture? If not then there is nothing to draw...
             if (SpriteTexture != null)
             {
+                Vector2 roundedPosition;
                 //Round off position to reduce blurryness (CUSTOM)
-                var roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y))
-                    + new Vector2((float)Math.Round(-Camera.Position.X), (float)Math.Round(-Camera.Position.Y)) ;
-                //+ new Vector2(Camera.Width/2f, Camera.Height/2f)
+                if (DontFollowCamera)
+                {
+                    roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y));
+                }
+                else
+                {
+                    roundedPosition = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y))
+                    + new Vector2((float)Math.Round(-Camera.Position.X), (float)Math.Round(-Camera.Position.Y));
+                }
+                
 
                 // Has a source rectangle been set?
                 if (SourceRect.IsEmpty)

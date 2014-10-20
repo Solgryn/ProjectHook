@@ -11,6 +11,7 @@ namespace ProjectHook.Menu
 {
     public class Menu<T> : TextObject
     {
+        internal int MenuSpace = 64;
         internal readonly List<T> Items = new List<T>();
         internal SpriteFont _font;
         internal GameHost _game;

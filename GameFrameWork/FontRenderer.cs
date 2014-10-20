@@ -12,6 +12,10 @@ namespace ProjectHook.GameFrameWork
         public string Text;
         public Vector2 Position;
         public FontDisplays FontDisplay = FontDisplays.Right;
+        public float CharacterSpacing;
+        public bool DoSineWave;
+        private double _timer = 0;
+        public float SineWaveLength = 0;
 
         public enum FontDisplays
         {
@@ -21,6 +25,7 @@ namespace ProjectHook.GameFrameWork
 
         public FontRenderer(FontFile fontFile, Texture2D fontTexture, Vector2 position, FontDisplays fontDisplay)
         {
+            CharacterSpacing = 0;
             _fontFile = fontFile;
             _texture = fontTexture;
             _characterMap = new Dictionary<char, FontChar>();
@@ -55,6 +60,8 @@ namespace ProjectHook.GameFrameWork
         private Texture2D _texture;
         public void DrawText(SpriteBatch spriteBatch)
         {
+            if (Text == null) return; //If no text, return
+
             float offsetX = 0;
             var draws = new List<Draw>();
             var dx = Position.X;
@@ -70,20 +77,24 @@ namespace ProjectHook.GameFrameWork
 
                     draws.Add(new Draw(_texture, position, sourceRectangle, Color.White)); //Add the current character to draw later
 
-                    dx += fc.XAdvance;
+                    dx += fc.XAdvance + CharacterSpacing;
                     //Gradually find out the width of all the characters in the string
-                    //by adding ther width of the current character and 1 (which is the space between each character)
-                    pixelLength += fc.Width + 1;
+                    //by adding ther width of the current character, optional character specing and 1 (which is the space between each character)
+                    pixelLength += fc.Width + CharacterSpacing + 1;
                 }
             }
             if (FontDisplay == FontDisplays.Center) //If the text should be centered then
             {
-                offsetX = (float)Math.Round(pixelLength * -0.5f); //Add half of the pixe length to the string, which centers it
+                offsetX = (float)Math.Round(pixelLength * -0.5f); //Add half of the pixel length to the string, which centers it
             }
+            _timer += 0.05;
             foreach (var draw in draws)
             {
-                //Draw all the "saved" characters, with the offset if necessary
-                spriteBatch.Draw(draw.Texture, new Vector2(draw.Position.X + offsetX, draw.Position.Y), draw.SourceRectangle, draw.Color);
+                var characterYOffset = 0f;
+                if (DoSineWave)
+                    characterYOffset = (float)Math.Sin(_timer + draw.Position.X / 5f) * SineWaveLength; 
+                //Draw all the "saved" characters, with the offset if necessary, also offsetting with character spacing
+                spriteBatch.Draw(draw.Texture, new Vector2(draw.Position.X + offsetX, draw.Position.Y + characterYOffset), draw.SourceRectangle, draw.Color);
             }
             draws.Clear();
         }

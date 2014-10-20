@@ -10,23 +10,36 @@ using ProjectHook.GameFrameWork;
 
 namespace ProjectHook.Menu
 {
-    public class StageSelect : Menu<SpriteObject>, IMenu
+    public class StageSelect : Menu<FontRenderer>, IMenu
     {
-        private const string Folder = "StageSelect/";
-        
-        public enum States
-        {
-            Race,
-            Options,
-            Exit,
-        }
+        //TODO remove this redundancy, and make text bitmap text
+        private readonly List<String> _menuItems = new List<string>();
+        private readonly List<Globals.Levels> _menuItems_DATA = new List<Globals.Levels>();
 
-        public States MenuState { get; set; }
+        private const string Folder = "StageSelect/";
 
         public StageSelect(GameHost game, SpriteFont font, Vector2 position) : base(game, font, position)
         {
             _font = font;
             _game = game;
+
+            //Generate menu items depending on the enum list
+            foreach (Globals.Levels level in Enum.GetValues(typeof(Globals.Levels)))
+            {
+                //If the name has level in it
+                if (level.ToString().Contains("Level"))
+                {
+                    _menuItems.Add(level.ToDescription());
+                    _menuItems_DATA.Add(level);
+                }
+            }
+            //Add a goback button
+            _menuItems.Add("Go Back");
+        }
+
+        public Globals.Menus GetName()
+        {
+            return Globals.Menus.StageSelect;
         }
 
         public void ShowMenu()
@@ -36,67 +49,55 @@ namespace ProjectHook.Menu
             //Load textures
             var bgTex = Game.Content.Load<Texture2D>(Folder + "Background");
 
-            var stages = new List<Texture2D>
-            {
-                Game.Content.Load<Texture2D>(Folder + "Stage1"),
-                Game.Content.Load<Texture2D>(Folder + "Stage2"),
-                Game.Content.Load<Texture2D>(Folder + "Stage3")
-            };
-
+            //Add objects
             var title = new SpriteObject(_game, new Vector2(0, 0), bgTex);
-
             Game.GameObjects.Add(title);
 
-            for (var i = 0; i < stages.Count; i++)
+           
+            for (var i = 0; i < _menuItems.Count; i++)
             {
-                var menuItem = new SpriteObject(_game, new Vector2(0, 0), stages[i])
-                {
-                    SourceRect = new Rectangle(80, 0, 80, 64)
-                };
-
-                float width = menuItem.SourceRect.Width + 8;
-
-                //Place objects
+                var menuitem = Game.Content.NewFont("bitmapfont", new Vector2(Camera.Width / 2f, 200), FontRenderer.FontDisplays.Center);
+                menuitem.Text = _menuItems[i];
+                //Centers the text
                 var x = Camera.Width / 2f;
-                x -= width * (stages.Count / 2f);
-                x += width * i;
-                var y = Camera.Height / 2f + 150;
-                menuItem.Position = new Vector2(x, y);
-
-                //Add objects
-                Items.Add(menuItem);
-                _game.GameObjects.Add(menuItem);
+                var y = Camera.Height / 2f + i * MenuSpace;
+                menuitem.Position = new Vector2(x, y);
+                menuitem.DoSineWave = true;
+                Items.Add(menuitem);
+                Collections.Fonts.Add(menuitem);
             }
         }
 
         public void OpenSelection()
         {
-            switch (Items[Selection].SpriteTexture.Name) //Get texture name
+            switch (_menuItems[Selection])
             {
-                case Folder + "Stage1":
-                    Game.GoToLevel(Globals.Levels.Level1);
+                case "Go Back":
+                    Game.GoToMenu(Globals.TitleScreen);
                     break;
-                case Folder + "Stage2":
-                    Game.GoToLevel(Globals.Levels.Level2);
-                    break;
-                case Folder + "Stage3":
-                    Game.GoToLevel(Globals.Levels.Level3);
+                default:
+                    Game.GoToLevel(_menuItems_DATA[Selection]);
                     break;
             }
         }
 
         public override void Update(GameTime gameTime)
         {
-            Control = Globals.GetControl(PlayerIndex.One).X; //Get control
+            Control = Globals.GetControl(PlayerIndex.One).Y; //Get control
 
-            SelectionUpdate(); //Update Selection variable
+            SelectionUpdate();
 
             foreach (var item in Items)
             {
-                item.SourceRect = new Rectangle(0, 0, 80, 64); //Reset all sprites
+                if (!item.Equals(Items[Selection]))
+                {
+                    item.SineWaveLength = item.SineWaveLength.SmoothTowards(2f, Globals.SMOOTH_FAST);
+                    item.CharacterSpacing = item.CharacterSpacing.SmoothTowards(0, Globals.SMOOTH_FAST); ; //Reset all sprites if not selection
+                }
             }
 
-            Items[Selection].SourceRect = new Rectangle(80, 0, 80, 64); //Change selected item sprite
+            Items[Selection].SineWaveLength = Items[Selection].SineWaveLength.SmoothTowards(12f, Globals.SMOOTH_FAST);
+            Items[Selection].CharacterSpacing = Items[Selection].CharacterSpacing.SmoothTowards(15f, Globals.SMOOTH_FAST);
         }
     }
 }

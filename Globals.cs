@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ProjectHook.GameFrameWork;
@@ -14,6 +15,10 @@ namespace ProjectHook
 {
     public static class Globals
     {
+        public const float SMOOTH_SLOW = 0.05f;
+        public const float SMOOTH_MEDIUM = 0.15f;
+        public const float SMOOTH_FAST = 0.3f;
+
         public const string LAYER_SOLID = "Solid";
         public const string LAYER_BAD = "Bad";
         public const string LAYER_GOAL = "Goal";
@@ -21,20 +26,25 @@ namespace ProjectHook
 
         public static TitleScreen TitleScreen;
         public static StageSelect StageSelect;
-        public static Results ResultScreen;
-
+        public static ResultScreen ResultScreen;
+        
+        //Descriptions are what is displayed in the menus
         public enum Levels
         {
             None,
-            TitleScreen,
-            PauseMenu,
-            [Description("Level1")]
+            [Description("Level One")]
             Level1,
-            [Description("Level2")]
+            [Description("Level Two")]
             Level2,
-            [Description("Level3")]
-            Level3,
-            StageSelect
+            [Description("Level Three")]
+            Level3
+        }
+
+        public enum Menus
+        {
+            TitleScreen,
+            StageSelect,
+            ResultScreen
         }
 
         public static Vector2 GetControl(PlayerIndex index)

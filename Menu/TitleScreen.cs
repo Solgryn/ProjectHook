@@ -14,12 +14,10 @@ using Keyboard = Microsoft.Xna.Framework.Input.Keyboard;
 
 namespace ProjectHook.Menu
 {
-    public class TitleScreen : Menu<TextObject>, IMenu
+    public class TitleScreen : Menu<FontRenderer>, IMenu
     {
         private readonly List<String> _menuItems = new List<string> {"Race", "Exit"};
-        private TextObject _menuitem;
         public bool IsMenuOpen { get; set; }
-        private int _selectedItem;
 
         public enum States
         {
@@ -36,33 +34,37 @@ namespace ProjectHook.Menu
             _game = game;
         }
 
+        public Globals.Menus GetName()
+        {
+            return Globals.Menus.TitleScreen;
+        }
+
         public void ShowMenu()
         {
-            _selectedItem = 0;
-
             IsMenuOpen = true;
             var titleTex = Game.Content.Load<Texture2D>("TitleScreen/Background");
 
             var _title = new SpriteObject(_game, new Vector2(0, 0), titleTex);
 
             Game.GameObjects.Add(_title);
+
             for (var i = 0; i < _menuItems.Count; i++)
             {
-                _menuitem = new TextObject(_game, _font, new Vector2(0, 0), _menuItems[i]);
+                var menuitem = Game.Content.NewFont("bitmapfont", new Vector2(Camera.Width / 2f, 200), FontRenderer.FontDisplays.Center);
+                menuitem.Text = _menuItems[i];
                 //Centers the text
-                float x = Camera.Width/2 - _menuitem.BoundingBox.Width/2;
-                float y = Camera.Height/2 - _menuitem.BoundingBox.Height + i*30;
-                _menuitem.Position = new Vector2(x, y);
-                Items.Add(_menuitem);
-                _game.GameObjects.Add(_menuitem);
+                var x = Camera.Width / 2f;
+                var y = Camera.Height / 2f + i * MenuSpace;
+                menuitem.Position = new Vector2(x, y);
+                menuitem.DoSineWave = true;
+                Items.Add(menuitem);
+                Collections.Fonts.Add(menuitem);
             }
-
-            Items[_selectedItem].SpriteColor = Color.Green;
         }
 
         public void OpenSelection()
         {
-            switch (_menuItems[_selectedItem])
+            switch (_menuItems[Selection])
             {
                 case "Race":
                     Game.GoToMenu(Globals.StageSelect);
@@ -81,10 +83,15 @@ namespace ProjectHook.Menu
 
             foreach (var item in Items)
             {
-                item.SpriteColor = Color.White; //Reset all sprites
+                if (!item.Equals(Items[Selection]))
+                {
+                    item.SineWaveLength = item.SineWaveLength.SmoothTowards(2f, Globals.SMOOTH_FAST);
+                    item.CharacterSpacing = item.CharacterSpacing.SmoothTowards(0, Globals.SMOOTH_FAST); ; //Reset all sprites if not selection
+                }
             }
 
-            Items[Selection].SpriteColor = Color.Green;
+            Items[Selection].SineWaveLength = Items[Selection].SineWaveLength.SmoothTowards(12f, Globals.SMOOTH_FAST);
+            Items[Selection].CharacterSpacing = Items[Selection].CharacterSpacing.SmoothTowards(15f, Globals.SMOOTH_FAST);
         }
     }
 }
