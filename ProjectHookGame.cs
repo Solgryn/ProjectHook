@@ -70,6 +70,7 @@ namespace ProjectHook
         /// </summary>
         protected override void Initialize()
         {
+            Sounds.Game = this; //Reference to the game
             //Music
             Sounds.Music1 = Content.Load<SoundEffect>("Music/Stage1.wav").CreateInstance();
             Sounds.Music2 = Content.Load<SoundEffect>("Music/Stage2.wav").CreateInstance();
@@ -83,6 +84,9 @@ namespace ProjectHook
             Sounds.Select = Content.Load<SoundEffect>("Sounds/select.wav").CreateInstance();
             Sounds.Hook = Content.Load<SoundEffect>("Sounds/hook.wav").CreateInstance();
             Sounds.Pull = Content.Load<SoundEffect>("Sounds/pull.wav").CreateInstance();
+
+            Sounds.CountdownEnd = Content.Load<SoundEffect>("Sounds/countdown_end.wav").CreateInstance();
+            Sounds.CountdownTick = Content.Load<SoundEffect>("Sounds/countdown_tick.wav").CreateInstance();
 
             //Add music to collection (So that all music can be stopped)
             Collections.Music.AddRange(new[]
@@ -101,7 +105,9 @@ namespace ProjectHook
                 Sounds.Powerup,
                 Sounds.Select,
                 Sounds.Hook,
-                Sounds.Pull
+                Sounds.Pull,
+                Sounds.CountdownTick,
+                Sounds.CountdownEnd
             });
 
             _font = Content.Load<SpriteFont>("MonoLog");

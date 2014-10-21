@@ -122,6 +122,12 @@
     <Content Include="Content\Results\Background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Sounds\countdown_end.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Sounds\countdown_tick.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\Sounds\died.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -71,11 +71,16 @@ namespace ProjectHook
         //returns true if countdown is still going
         public bool CountDownUpdate()
         {
-            if (_miliseconds == 0 && _seconds == 0 && _minutes == 0) return false;
+            if (_miliseconds == 0 && _seconds == 0 && _minutes == 0)
+            {
+                Sounds.Game.PlaySound(Sounds.CountdownEnd); //At the end, play end sound
+                return false;
+            }
 
             
             if (_miliseconds == 0 && _seconds > 0)
             {
+                Sounds.Game.PlaySound(Sounds.CountdownTick); //Each second, play sound
                 _seconds--;
                 _miliseconds = 60;
             }
