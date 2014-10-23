@@ -40,7 +40,7 @@ namespace ProjectHook.Menu
                 if(direction > 0 && Selection < Items.Count - 1 ||
                    direction < 0 && Selection > 0) //Checks if selection is within boundaries
                 {
-                    Game.PlaySound(Sounds.Select);
+                    Sounds.PlaySound(Sounds.Select);
                     Selection += direction; //Returns either -1 or 1
                     Selection = MathHelper.Clamp(Selection, 0, Items.Count - 1); //Adds the control to the selection, and keeps it within the menu range
                     SelectCooldown.GoOnCooldown();

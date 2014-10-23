@@ -43,10 +43,13 @@ namespace ProjectHook
 
         public void Update(GameTime gameTime)
         {
-            if (!CountDown.CountDownUpdate())
+            if (!IsStarted)
             {
-                IsStarted = true;
-                Timer.Start();
+                if (!CountDown.CountDownUpdate())
+                {
+                    IsStarted = true;
+                    Timer.Start();
+                }
             }
                 
             if (IsStarted)
