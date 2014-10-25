@@ -70,23 +70,31 @@ namespace ProjectHook
         /// </summary>
         protected override void Initialize()
         {
-            Sounds.Game = this; //Reference to the game
             //Music
-            Sounds.Music1 = Content.Load<SoundEffect>("Music/Stage1.wav").CreateInstance();
-            Sounds.Music2 = Content.Load<SoundEffect>("Music/Stage2.wav").CreateInstance();
-            Sounds.Music3 = Content.Load<SoundEffect>("Music/Stage3.wav").CreateInstance();
-            Sounds.ResultScreen = Content.Load<SoundEffect>("Music/ResultScreen.wav").CreateInstance();
+            Collections.Music.AddRange(new[]
+            {
+                Sounds.Music1 = Content.Load<SoundEffect>("Music/Stage1.wav").CreateInstance(),
+                Sounds.Music2 = Content.Load<SoundEffect>("Music/Stage2.wav").CreateInstance(),
+                Sounds.Music3 = Content.Load<SoundEffect>("Music/Stage3.wav").CreateInstance(),
+                Sounds.ResultScreen = Content.Load<SoundEffect>("Music/ResultScreen.wav").CreateInstance()
+            });
+            
 
             //Sound effects
-            Sounds.Died = Content.Load<SoundEffect>("Sounds/died.wav").CreateInstance();
-            Sounds.Jump = Content.Load<SoundEffect>("Sounds/jump.wav").CreateInstance();
-            Sounds.Powerup = Content.Load<SoundEffect>("Sounds/powerup.wav").CreateInstance();
-            Sounds.Select = Content.Load<SoundEffect>("Sounds/select.wav").CreateInstance();
-            Sounds.Hook = Content.Load<SoundEffect>("Sounds/hook.wav").CreateInstance();
-            Sounds.Pull = Content.Load<SoundEffect>("Sounds/pull.wav").CreateInstance();
+            Collections.SoundEffects.AddRange(new[]
+            {
+                Sounds.Died = Content.Load<SoundEffect>("Sounds/died.wav").CreateInstance(),
+                Sounds.Jump = Content.Load<SoundEffect>("Sounds/jump.wav").CreateInstance(),
+                Sounds.Powerup = Content.Load<SoundEffect>("Sounds/powerup.wav").CreateInstance(),
+                Sounds.Hook = Content.Load<SoundEffect>("Sounds/hook.wav").CreateInstance(),
+                Sounds.Pull = Content.Load<SoundEffect>("Sounds/pull.wav").CreateInstance(),
 
-            Sounds.CountdownEnd = Content.Load<SoundEffect>("Sounds/countdown_end.wav").CreateInstance();
-            Sounds.CountdownTick = Content.Load<SoundEffect>("Sounds/countdown_tick.wav").CreateInstance();
+                Sounds.Select = Content.Load<SoundEffect>("Sounds/select.wav").CreateInstance(),
+                Sounds.Confirm = Content.Load<SoundEffect>("Sounds/menu_confirm.wav").CreateInstance(),
+
+                Sounds.CountdownTick = Content.Load<SoundEffect>("Sounds/countdown_tick.wav").CreateInstance(),
+                Sounds.CountdownDone = Content.Load<SoundEffect>("Sounds/countdown_done.wav").CreateInstance()
+            });
 
             //Add music to collection (So that all music can be stopped)
             Collections.Music.AddRange(new[]
@@ -95,19 +103,6 @@ namespace ProjectHook
                 Sounds.Music2,
                 Sounds.Music3,
                 Sounds.ResultScreen
-            });
-
-            //Add sound effects to collection
-            Collections.SoundEffects.AddRange(new[]
-            {
-                Sounds.Died,
-                Sounds.Jump,
-                Sounds.Powerup,
-                Sounds.Select,
-                Sounds.Hook,
-                Sounds.Pull,
-                Sounds.CountdownTick,
-                Sounds.CountdownEnd
             });
 
             _font = Content.Load<SpriteFont>("MonoLog");
@@ -185,8 +180,8 @@ namespace ProjectHook
             {
                 var fishTx = Content.Load<Texture2D>("fish");
 
-                _player1 = new Player(this, new Vector2(185, 150), fishTx, PlayerIndex.One);
-                _player2 = new Player(this, new Vector2(175, 150), fishTx, PlayerIndex.Two);
+                _player1 = new Player(this, new Vector2(185, 75), fishTx, PlayerIndex.One);
+                _player2 = new Player(this, new Vector2(185, 225), fishTx, PlayerIndex.Two);
                 Collections.Players.Add(_player1);
                 Collections.Players.Add(_player2);
             }
@@ -249,7 +244,7 @@ namespace ProjectHook
                 //Set x position to average of all players
                 Camera.Position.Y = 0;
 
-                Camera.Position.X = Math.Max(Camera.Position.X, 32); //Limit camera
+                Camera.Position.X = Math.Max(Camera.Position.X, 64); //Limit camera
             }
             
             //Toggle drawing of hitboxes
@@ -262,11 +257,11 @@ namespace ProjectHook
             if (Keyboard.GetState().IsKeyUp(Keys.F1))
                 _canPressKey = true;
 
-            //TODO add controller buttons
             //Menu controls
             if ((GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A) || Keyboard.GetState().IsKeyDown(Keys.Enter)) && _canPressEnter && CurrentMenu != null)
             {
                 _canPressEnter = false;
+                Sounds.PlaySound(Sounds.Confirm);
                 CurrentMenu.OpenSelection();
             }
 
@@ -296,7 +291,6 @@ namespace ProjectHook
             //If in a level and racing, display the timer and who's in the lead
             if (CurrentLevel != Globals.Levels.None && CurrentRace != null)
             {
-                Debug.WriteLine(CurrentRace.CountDown.GetAsText());
                 CurrentRace.Update(gameTime);
                 //Race hasnt started yet
                 if (!CurrentRace.IsStarted)
@@ -357,7 +351,7 @@ namespace ProjectHook
                 {
                     var gameObject = (SpriteObject) gameObjectBase;
                     _spriteBatch.Draw(
-                        generateTexture2D(gameObject.BoundingBox.Width, gameObject.BoundingBox.Height, Color.Red),
+                        GenerateTexture2D(gameObject.BoundingBox.Width, gameObject.BoundingBox.Height, Color.Red),
                         new Vector2(gameObject.BoundingBox.Location.X + (-Camera.Position.X),
                             gameObject.BoundingBox.Location.Y + Camera.Position.Y)*Camera.Scale);
                 }
@@ -372,7 +366,7 @@ namespace ProjectHook
             base.Draw(gameTime);
         }
 
-        private Texture2D generateTexture2D(int width, int height, Color textureColor)
+        private Texture2D GenerateTexture2D(int width, int height, Color textureColor)
         {
             var rectangleTexture = new Texture2D(GraphicsDevice, width, height, false, SurfaceFormat.Color);
             var color = new Color[width*height];
@@ -427,11 +421,6 @@ namespace ProjectHook
             music.Play(); //Starts the music
         }
 
-        public override void PlaySound(SoundEffectInstance sound, bool doLoop = false)
-        {
-            sound.Volume = Sounds.SoundEffectVolume;
-            sound.IsLooped = doLoop; //Should the music loop or not
-            sound.Play(); //Starts the music
-        }
+        
     }
 }

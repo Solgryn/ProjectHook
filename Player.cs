@@ -92,7 +92,6 @@ namespace ProjectHook
 
             //Make the text above the players
             IndexText = new TextObject(Game, Game.Fonts["thefont"], new Vector2(0, 0));
-            IndexText.Text = playerIndex.ToString();
             Game.GameObjects.Add(IndexText);
         }
 
@@ -118,15 +117,25 @@ namespace ProjectHook
             //Slow debuff
             if (!_slowDebuff.IsOff())
             {
-                MaxSpeed = _startMaxSpeed * 0.6f; //Players are slower
+                SpriteColor = Color.IndianRed; //Turn the player red while they have the debuff
+                MaxSpeed = _startMaxSpeed*0.6f; //Players are slower
                 _slowDebuff.Decrement();
+            }
+            else if (SpriteColor == Color.IndianRed)
+            {
+                SpriteColor = Color.White;
             }
 
             //Speed buff
             if (!_speedBuff.IsOff())
             {
-                MaxSpeed = _startMaxSpeed * 1.4f; //Players are faster
+                SpriteColor = Color.LightGreen; //Turn the player green while they have the buff
+                MaxSpeed = _startMaxSpeed*1.4f; //Players are faster
                 _speedBuff.Decrement();
+            }
+            else if (SpriteColor == Color.LightGreen)
+            {
+                SpriteColor = Color.White;
             }
                 
             #endregion
@@ -175,7 +184,7 @@ namespace ProjectHook
             //Jump
             if (_jumpKey && CanJump && CanControl)
             {
-                Game.PlaySound(Sounds.Jump);
+                Sounds.PlaySound(Sounds.Jump);
                 Velocity.Y = JumpStrength;
                 CanJump = false;
             }
@@ -205,6 +214,7 @@ namespace ProjectHook
                 Velocity.Y += 0.35f;
 
             //Here we move the player 1 pixel at a time, and check for collisions per pixel
+            //To avoid uneccessary calculations, velocity is checked for whether it's left/right/up/down
 
             //X
             var temp = Math.Abs(Velocity.X);
@@ -215,14 +225,26 @@ namespace ProjectHook
                 Detector.Left = new Rectangle((int)(PositionX - detectorXOffset), (int)(PositionY - detectorYOffset), 1, (int)detectorHeight);
                 Detector.Right = new Rectangle((int)(PositionX + detectorXOffset), (int)(PositionY - detectorYOffset), 1, (int)detectorHeight);
 
-                //Overlaps obstacles
-                if (OverlapsTileLayer(Detector.Right, Globals.LAYER_SOLID) && Velocity.X > 0 ||
-                    OverlapsTileLayer(Detector.Left, Globals.LAYER_SOLID) && Velocity.X < 0)
+                //Overlaps obstacles to the right
+                if (Velocity.X > 0)
                 {
-                    Velocity.X = 0;
-                    break;
+                    if (OverlapsTileLayer(Detector.Right, Globals.LAYER_SOLID)) //Very costly calculation
+                    {
+                        Velocity.X = 0;
+                        break;
+                    }
                 }
-                    
+
+                //Overlaps obstacles to the left
+                if (Velocity.X < 0)
+                {
+                    if (OverlapsTileLayer(Detector.Left, Globals.LAYER_SOLID)) //Very costly calculation
+                    {
+                        Velocity.X = 0;
+                        break;
+                    }
+                }
+                
                 //If movement is less than 1, move the rest
                 if (temp < 1)
                 {
@@ -243,25 +265,33 @@ namespace ProjectHook
                 Detector.Up = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY - 16f), (int)detectorWidth - 4, 1);
                 Detector.Down = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY + 31), (int)detectorWidth - 4, 1);
 
-                //Is off the ground
-                if (!OverlapsTileLayer(Detector.Down, Globals.LAYER_SOLID))
-                    CanJump = false;
+                
 
                 //Hit the ceiling
-                if (OverlapsTileLayer(Detector.Up, Globals.LAYER_SOLID) && Velocity.Y < 0)
+                if (Velocity.Y < 0)
                 {
-                    Velocity.Y = 0;
-                    break;
+                    if (OverlapsTileLayer(Detector.Up, Globals.LAYER_SOLID)) //Very costly calculation
+                    {
+                        Velocity.Y = 0;
+                        break;
+                    }
                 }
-
+                
                 //Hit the ground
-                if (OverlapsTileLayer(Detector.Down, Globals.LAYER_SOLID) && Velocity.Y > 0)
+                if (Velocity.Y > 0)
                 {
-                    OnGround = true;
-                    CanJump = true;
-                    Velocity.Y = 0;
-                    break;
+                    if (OverlapsTileLayer(Detector.Down, Globals.LAYER_SOLID)) //Very costly calculation
+                    {
+                        OnGround = true;
+                        CanJump = true;
+                        Velocity.Y = 0;
+                        break;
+                    }
+                    //Is off the ground
+                    OnGround = false;
+                    CanJump = false;
                 }
+                
                 //If movement is less than 1, move the rest
                 if (temp < 1)
                 {
@@ -276,12 +306,15 @@ namespace ProjectHook
 
             //Display font above head
             IndexText.Position = new Vector2(PositionX-Camera.Position.X-24, PositionY - 48);
+            IndexText.Text = PlayerIndex + " (" + Ammo + ")"; //display the text (player number and ammo)
 
             #region Player dies
             //If out of frame, die
             if (IsOutOfFrame(256) || PositionX + 16 < Camera.Position.X || OverlapsTileLayer(BoundingBox, Globals.LAYER_BAD))
                 Die();
             #endregion
+
+            #region Interactables (Goal, Powerups)
 
             //Player reaches the goal
             if (OverlapsTileLayer(BoundingBox, Globals.LAYER_GOAL))
@@ -291,7 +324,7 @@ namespace ProjectHook
             var ammoCrate = OverlapsTileType(BoundingBox, "ammo"); //Check if there's an ammo crate where you are
             if (ammoCrate != null) //If there is, get ammo and destroy the crate
             {
-                Game.PlaySound(Sounds.Powerup);
+                Sounds.PlaySound(Sounds.Powerup);
                 Collections.Tiles.Remove(ammoCrate);
                 Ammo++;
             }
@@ -300,7 +333,7 @@ namespace ProjectHook
             var speedCrate = OverlapsTileType(BoundingBox, "speed"); //Check if there's an ammo crate where you are
             if (speedCrate != null) //If there is, get ammo and destroy the crate
             {
-                Game.PlaySound(Sounds.Powerup);
+                Sounds.PlaySound(Sounds.Powerup);
                 Collections.Tiles.Remove(speedCrate);
                 _speedBuff.GoOnCooldown();
             }
@@ -309,8 +342,10 @@ namespace ProjectHook
             if (OverlapsTileType(BoundingBox, "goal") != null)
             {
                 Game.CurrentRace.FinishRace();
-                Game.GoToMenu(Globals.ResultScreen);        
+                Game.GoToMenu(Globals.ResultScreen);
             }
+
+            #endregion
 
             #region Animations
             //Set animations
@@ -347,7 +382,7 @@ namespace ProjectHook
         public void ThrowHook()
         {
             if(Ammo == 0) return;
-            Game.PlaySound(Sounds.Hook);
+            Sounds.PlaySound(Sounds.Hook);
             var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), this, 15);
             Game.GameObjects.Add(hook);
             Ammo--;
@@ -373,7 +408,7 @@ namespace ProjectHook
         //Hook hits tile
         public void HookHit(Hook hook)
         {
-            Game.PlaySound(Sounds.Pull);
+            Sounds.PlaySound(Sounds.Pull);
             //Set velocity of player 
             Velocity.Y = hook.Pull.Y * 2;
             Velocity.X = (hook.Pull.X * hook.GetDirection()) * 1.3f;
@@ -384,7 +419,7 @@ namespace ProjectHook
 
         public void Die()
         {
-            Game.PlaySound(Sounds.Died);
+            Sounds.PlaySound(Sounds.Died);
             Position = new Vector2(Camera.Position.X + Camera.Width / 4f, Camera.Position.Y+100);
             Velocity = Vector2.Zero;
             _slowDebuff.GoOnCooldown(); //Add slow debuff

@@ -250,16 +250,16 @@ namespace GrappleRace.GameFrameWork
         }
 
         //Check if the object is overlapping a tile from a layer with a specific layer name
+        //This function is very costly, so a lot of checks are made to reduce lag
         public bool OverlapsTileLayer(Rectangle hitbox, string layerName)
         {
-            var hitboxLocation = new Vector2(hitbox.Location.X + hitbox.Width / 2f, //Find where the hitbox is
-                            hitbox.Location.Y + hitbox.Height / 2f);
             foreach (var tile in Collections.Tiles)
             {
-                //This function is very costly, so a lot of checks are made to ensure the game doesn't lag
-                
                 if (tile.LayerName != layerName) continue; //Don't continue if the tile is on the right layer
                 if (tile.IsOutOfFrame(0)) continue; //Don't continue if the tile is out of the frame
+
+                var hitboxLocation = new Vector2(hitbox.Location.X + hitbox.Width / 2f, //Find where the hitbox is
+                            hitbox.Location.Y + hitbox.Height / 2f);
 
                 //If the tile is close to the hitbox location (64 pixels), check if it intersects the hitbox by continueing
                 if (!(Vector2.Distance(tile.Position, hitboxLocation) < 64)) continue;

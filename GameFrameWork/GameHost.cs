@@ -178,10 +178,5 @@ namespace ProjectHook.GameFrameWork
         {
 
         }
-
-        public virtual void PlaySound(SoundEffectInstance sound, bool doLoop = false)
-        {
-
-        }
     }
 }

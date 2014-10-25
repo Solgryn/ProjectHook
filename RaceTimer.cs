@@ -73,14 +73,13 @@ namespace ProjectHook
         {
             if (_miliseconds == 0 && _seconds == 0 && _minutes == 0)
             {
-                Sounds.Game.PlaySound(Sounds.CountdownEnd); //At the end, play end sound
+                Sounds.PlaySound(Sounds.CountdownDone); //When countdown is done, play sound
                 return false;
             }
 
-            
             if (_miliseconds == 0 && _seconds > 0)
             {
-                Sounds.Game.PlaySound(Sounds.CountdownTick); //Each second, play sound
+                Sounds.PlaySound(Sounds.CountdownTick); //Every second, play tick
                 _seconds--;
                 _miliseconds = 60;
             }
