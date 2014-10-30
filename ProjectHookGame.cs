@@ -73,7 +73,7 @@ namespace ProjectHook
             //Music
             Collections.Music.AddRange(new[]
             {
-                Sounds.Music1 = Content.Load<SoundEffect>("Music/Stage1.wav").CreateInstance(),
+                Sounds.Music1 = Content.Load<SoundEffect>("Music/Stage3.wav").CreateInstance(),
                 Sounds.Music2 = Content.Load<SoundEffect>("Music/Stage2.wav").CreateInstance(),
                 Sounds.Music3 = Content.Load<SoundEffect>("Music/Stage3.wav").CreateInstance(),
                 Sounds.ResultScreen = Content.Load<SoundEffect>("Music/ResultScreen.wav").CreateInstance()
@@ -116,8 +116,8 @@ namespace ProjectHook
 
             //TODO add options menu to toggle this as well as music / sound volume
             //Set to full screen
-            //_graphics.IsFullScreen = true;
-            //_graphics.ApplyChanges();
+            _graphics.IsFullScreen = true;
+            _graphics.ApplyChanges();
 
             _font = Content.Load<SpriteFont>("MonoLog");
             Fonts.Add("thefont", _font);
@@ -182,8 +182,19 @@ namespace ProjectHook
 
                 _player1 = new Player(this, new Vector2(185, 75), fishTx, PlayerIndex.One);
                 _player2 = new Player(this, new Vector2(185, 225), fishTx, PlayerIndex.Two);
+                
                 Collections.Players.Add(_player1);
                 Collections.Players.Add(_player2);
+
+                //_player1.IsAi = true;
+                //_player2.IsAi = true;
+
+                //Set ai players
+                var gamePadState = GamePad.GetState(PlayerIndex.Two);
+                if (!gamePadState.IsConnected)
+                {
+                    _player2.IsAi = true;
+                }
             }
 
             //Reset camera position

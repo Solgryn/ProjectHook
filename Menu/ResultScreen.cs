@@ -12,7 +12,7 @@ namespace ProjectHook.Menu
 {
     public class ResultScreen : Menu<FontRenderer>, IMenu
     {
-        //TODO remove this redundancy, and make text bitmap text
+        //TODO remove this redundancy
         private readonly List<String> _menuItems = new List<string> { "Go Back", "Re-Race" };
 
         private const string Folder = "Results/";

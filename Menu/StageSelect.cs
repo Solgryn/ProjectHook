@@ -12,7 +12,7 @@ namespace ProjectHook.Menu
 {
     public class StageSelect : Menu<FontRenderer>, IMenu
     {
-        //TODO remove this redundancy, and make text bitmap text
+        //TODO remove this redundancy
         private readonly List<String> _menuItems = new List<string>();
         private readonly List<Globals.Levels> _menuItems_DATA = new List<Globals.Levels>();
 

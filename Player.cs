@@ -13,6 +13,12 @@ namespace ProjectHook
         private readonly int _playerIndexInt;
         private TextObject IndexText;
 
+        private int _hasFailedAction = 0;
+
+        public bool IsAi = false;
+
+        private float gravity = 0.35f;
+
         public Vector2 Velocity = new Vector2(0, 0);
         public float Acceleration = 0.6f;
         public float Deacceleration = 0.4f;
@@ -141,65 +147,126 @@ namespace ProjectHook
             #endregion
 
             #region Controls
-            //Get X control
-            var controlX = Globals.GetControl(PlayerIndex).X;
 
-            //Get buttons
-            if (GamePad.GetState(PlayerIndex).IsConnected)
+            if (!IsAi)
             {
-                var gamepadState = GamePad.GetState(PlayerIndex);
-                _jumpKey = gamepadState.IsButtonDown(Buttons.A);
-                _grappleKey = gamepadState.IsButtonDown(Buttons.B);
-            }
-            else
-            {
-                _jumpKey = Keyboard.GetState().IsKeyDown(Keys.Z);
-                _grappleKey = Keyboard.GetState().IsKeyDown(Keys.X);
-            }
+                //Get X control
+                var controlX = Globals.GetControl(PlayerIndex).X;
 
-            //Walk Left
-            if (controlX < 0 && CanControl && Velocity.X > -MaxSpeed)
-            {
-                spriteEffects = SpriteEffects.FlipHorizontally;
-                Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
-            }
+                //Get buttons
+                if (GamePad.GetState(PlayerIndex).IsConnected)
+                {
+                    var gamepadState = GamePad.GetState(PlayerIndex);
+                    _jumpKey = gamepadState.IsButtonDown(Buttons.A);
+                    _grappleKey = gamepadState.IsButtonDown(Buttons.B);
+                }
+                else
+                {
+                    _jumpKey = Keyboard.GetState().IsKeyDown(Keys.Z);
+                    _grappleKey = Keyboard.GetState().IsKeyDown(Keys.X);
+                }
+
+                //Walk Left
+                if (controlX < 0 && CanControl && Velocity.X > -MaxSpeed)
+                {
+                    spriteEffects = SpriteEffects.FlipHorizontally;
+                    Velocity.X = Math.Max(Velocity.X - Acceleration, controlX * MaxSpeed);
+                }
                 //Deccelerate to the left
-            else if (Velocity.X < 0)
-            {
-                Velocity.X = Math.Min(Velocity.X + Deacceleration, 0);
-            }
+                else if (Velocity.X < 0)
+                {
+                    Velocity.X = Math.Min(Velocity.X + Deacceleration, 0);
+                }
 
-            //Walk Right
-            if (controlX > 0 && CanControl && Velocity.X < MaxSpeed)
-            {
-                spriteEffects = SpriteEffects.None;
-                Velocity.X = Math.Min(Velocity.X + Acceleration, controlX * MaxSpeed);
-            }
+                //Walk Right
+                if (controlX > 0 && CanControl && Velocity.X < MaxSpeed)
+                {
+                    spriteEffects = SpriteEffects.None;
+                    Velocity.X = Math.Min(Velocity.X + Acceleration, controlX * MaxSpeed);
+                }
                 //Deccelerate to the right
-            else if (Velocity.X > 0)
-            {
-                Velocity.X = Math.Max(Velocity.X - Deacceleration, 0);
-            }
+                else if (Velocity.X > 0)
+                {
+                    Velocity.X = Math.Max(Velocity.X - Deacceleration, 0);
+                }
 
-            //Jump
-            if (_jumpKey && CanJump && CanControl)
-            {
-                Sounds.PlaySound(Sounds.Jump);
-                Velocity.Y = JumpStrength;
-                CanJump = false;
-            }
+                //Jump
+                if (_jumpKey && CanJump && CanControl)
+                {
+                    Jump();
+                }
                 //If jump key isn't held, shorten the jump
-            else if(Velocity.Y < 0 && !_jumpKey && CanControl)
-            {
-                Velocity.Y *=0.85f;
+                else if (Velocity.Y < 0 && !_jumpKey && CanControl)
+                {
+                    Velocity.Y *= 0.85f;
+                }
+
+                //Shoot Hook
+                if (_grappleKey)
+                {
+                    ThrowHook();
+                }
             }
             
-            //Shoot Hook
-            if (_grappleKey && _grappleCooldown.IsOff() && CanControl)
+            #endregion
+
+            #region AI
+
+            if (IsAi)
             {
-                ThrowHook();
-                _grappleCooldown.GoOnCooldown();
+                //TODO add a chance to fail
+                var random = new Random();
+
+                //Hitboxes
+                var testGround = new Rectangle((int)(PositionX + Detector.XOffset + 2), (int)(PositionY + Detector.YOffset*2), 16, 8);
+                var testDanger = BoundingBox;
+                testDanger.X += 32;
+
+                var testHook = BoundingBox;
+                testHook.Width *= 3;
+                testHook.X += testHook.Width;
+                testHook.Y -= 4;
+
+                //Always walk right
+                if (CanControl)
+                {
+                    //Run when race is started
+                    if(Game.CurrentRace.IsStarted)
+                        Velocity.X = Math.Min(Velocity.X + Acceleration, MaxSpeed);
+
+                    if (_hasFailedAction == 0)
+                    {
+                        //Jump over holes
+                        if (!OverlapsTileLayer(testGround, Globals.LAYER_SOLID) ||
+                            OverlapsTileLayer(Detector.Right, Globals.LAYER_SOLID))
+                        {
+                            Jump();
+                        }
+                        //Jump over spikes
+                        if (OverlapsTileLayer(testDanger, Globals.LAYER_BAD))
+                        {
+                            Jump();
+                        }
+                        //Use hook on players
+                        foreach (var player in Collections.Players)
+                        {
+                            if (testHook.Intersects(player.BoundingBox))
+                            {
+                                ThrowHook();
+                            }
+                        }
+                        //Use hook on level if spare ammo and not rising
+                        if (OverlapsTileLayer(testHook, Globals.LAYER_SOLID) &&
+                            Ammo > 1 &&
+                            Velocity.Y >= 0)
+                        {
+                            ThrowHook();
+                        }
+                    }
+                }
+                
             }
+
             #endregion
 
             #region Moving the player
@@ -211,7 +278,7 @@ namespace ProjectHook
 
             //Apply Gravity
             if(!OnGround)
-                Velocity.Y += 0.35f;
+                Velocity.Y += gravity;
 
             //Here we move the player 1 pixel at a time, and check for collisions per pixel
             //To avoid uneccessary calculations, velocity is checked for whether it's left/right/up/down
@@ -262,10 +329,8 @@ namespace ProjectHook
             for (var i = 0; i < Math.Abs(Velocity.Y); i++)
             {
                 //Update hit detectors
-                Detector.Up = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY - 16f), (int)detectorWidth - 4, 1);
+                Detector.Up = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY - 32f), (int)detectorWidth - 4, 1);
                 Detector.Down = new Rectangle((int)(PositionX - detectorXOffset + 2), (int)(PositionY + 31), (int)detectorWidth - 4, 1);
-
-                
 
                 //Hit the ceiling
                 if (Velocity.Y < 0)
@@ -381,11 +446,14 @@ namespace ProjectHook
 
         public void ThrowHook()
         {
+            if (!_grappleCooldown.IsOff()) return;
+            if (!CanControl) return;
             if(Ammo == 0) return;
             Sounds.PlaySound(Sounds.Hook);
             var hook = new Hook(Game, Position, Game.Content.Load<Texture2D>("grapple"), this, 15);
             Game.GameObjects.Add(hook);
             Ammo--;
+            _grappleCooldown.GoOnCooldown();
         }
 
         //Player gets hit by hook
@@ -415,6 +483,16 @@ namespace ProjectHook
 
             //Player can't control for a little bit
             CantControlFor = 15;
+        }
+
+        public void Jump()
+        {
+            if (CanJump)
+            {
+                Sounds.PlaySound(Sounds.Jump);
+                Velocity.Y = JumpStrength;
+                CanJump = false;
+            }
         }
 
         public void Die()
