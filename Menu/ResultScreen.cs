@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using GrappleRace.GameFrameWork;
@@ -44,6 +45,8 @@ namespace ProjectHook.Menu
 
             ResultText.Text = "Player " + _game.CurrentRace.FirstPlace + " won!\n";
 
+            HighScoreList();
+
             for (var i = 0; i < _menuItems.Count; i++)
             {
                 var menuitem = Game.Content.NewFont("bitmapfont", new Vector2(Camera.Width / 2f, 200), FontRenderer.FontDisplays.Center);
@@ -58,6 +61,29 @@ namespace ProjectHook.Menu
             }
         }
 
+        private void HighScoreList()
+        {
+            var HighScoreTitle = Game.Content.NewFont("bitmapfont", new Vector2(Camera.Width / 2f, 480),
+                           FontRenderer.FontDisplays.Center);
+            HighScoreTitle.Text = "Top 5";
+
+            Collections.Fonts.Add(HighScoreTitle);
+            List<String> HighScoreList = File.ReadAllLines(@"../../" + Game.PreviousLevel + "records.txt").ToList();
+            HighScoreList.Sort();
+
+            if (HighScoreList.Count > 0)
+            {
+                for (var i = 0; i < HighScoreList.Count; i++)
+                {
+                    var HighScore = Game.Content.NewFont("bitmapfont", new Vector2(Camera.Width / 2f, 530),
+                        FontRenderer.FontDisplays.Center);
+                    HighScore.Text = HighScoreList[i];
+                    HighScore.Position.Y += 35 * i;
+                    Collections.Fonts.Add(HighScore);
+                    if (i == 4) break;
+                }
+            }
+        }
         public void OpenSelection()
         {
             switch (_menuItems[Selection])

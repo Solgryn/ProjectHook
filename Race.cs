@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using GrappleRace.GameFrameWork;
@@ -19,16 +20,33 @@ namespace ProjectHook
         public RaceTimer Timer = new RaceTimer();
         public RaceTimer CountDown;
         public PlayerIndex FirstPlace;
+        private bool _recorded;
 
         public void StartRace()
         {
             CountDown = new RaceTimer(0, 3); //Start countdown at 3
+            _recorded = false;     
         }
 
-        public void FinishRace()
+        public void FinishRace(Globals.Levels currentLevel)
         {
+            string filepath = @"../../" + currentLevel + "records.txt";
+
+            if (!File.Exists(filepath))
+            {
+                FileStream fs = File.Create(filepath);
+                fs.Close();
+            }
+
             IsStarted = false;
             Timer.Stop();
+
+            if (!_recorded)
+            {
+                //Take Windows User Name
+                File.AppendAllText(filepath, Timer.GetAsText() + " by " + Environment.UserName + "\n");
+                _recorded = true;
+            }
         }
 
         public void CalcFirstPlace()

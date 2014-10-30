@@ -232,7 +232,7 @@ namespace ProjectHook
         /// </summary>
         protected override void UnloadContent()
         {
-            if (CurrentRace != null) CurrentRace.FinishRace();
+            if (CurrentRace != null) CurrentRace.FinishRace(CurrentLevel);
             GameObjects.Clear();
             Collections.Players.Clear();
             Collections.Tiles.Clear();

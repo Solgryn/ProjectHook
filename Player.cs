@@ -406,7 +406,7 @@ namespace ProjectHook
             //Goal
             if (OverlapsTileType(BoundingBox, "goal") != null)
             {
-                Game.CurrentRace.FinishRace();
+                Game.CurrentRace.FinishRace(Game.CurrentLevel);
                 Game.GoToMenu(Globals.ResultScreen);
             }
 
